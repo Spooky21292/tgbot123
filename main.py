@@ -4,6 +4,7 @@ import logging
 from datetime import datetime, time, timedelta
 
 from aiogram import Bot, Dispatcher, F
+from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
@@ -235,7 +236,7 @@ async def main() -> None:
     db = Database(cfg.db_path)
     db.init()
 
-    bot = Bot(token=cfg.token, parse_mode=ParseMode.HTML)
+    bot = Bot(token=cfg.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=MemoryStorage())
 
     register_handlers(dp, db, cfg.timezone)
