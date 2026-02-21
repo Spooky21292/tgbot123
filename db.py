@@ -16,6 +16,7 @@ class Task:
     is_done: int
     remind_1day_sent: int
     remind_2h_sent: int
+    remind_last_daily_sent: str | None = None
 
 
 class Database:
@@ -40,11 +41,17 @@ class Database:
                     created_at TEXT NOT NULL,
                     is_done INTEGER NOT NULL DEFAULT 0,
                     remind_1day_sent INTEGER NOT NULL DEFAULT 0,
-                    remind_2h_sent INTEGER NOT NULL DEFAULT 0
+                    remind_2h_sent INTEGER NOT NULL DEFAULT 0,
+                    remind_last_daily_sent TEXT
                 )
                 """
             )
             conn.commit()
+
+            columns = [row[1] for row in conn.execute("PRAGMA table_info(tasks)").fetchall()]
+            if "remind_last_daily_sent" not in columns:
+                conn.execute("ALTER TABLE tasks ADD COLUMN remind_last_daily_sent TEXT")
+                conn.commit()
 
     def add_task(self, user_id: int, subject: str, text: str, due_at_iso: str) -> int:
         created_at = datetime.utcnow().isoformat()
@@ -91,6 +98,19 @@ class Database:
             ).fetchall()
             return [Task(**dict(r)) for r in rows]
 
+
+    def get_completed_tasks(self, user_id: int) -> list[Task]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM tasks
+                WHERE user_id = ? AND is_done = 1
+                ORDER BY due_at DESC
+                """,
+                (user_id,),
+            ).fetchall()
+            return [Task(**dict(r)) for r in rows]
+
     def mark_done(self, task_id: int, user_id: int) -> bool:
         with self._connect() as conn:
             cur = conn.execute(
@@ -121,6 +141,7 @@ class Database:
         task_id: int,
         remind_1day_sent: int | None = None,
         remind_2h_sent: int | None = None,
+        remind_last_daily_sent: str | None = None,
     ) -> None:
         updates: list[str] = []
         params: list[int] = []
@@ -131,6 +152,9 @@ class Database:
         if remind_2h_sent is not None:
             updates.append("remind_2h_sent = ?")
             params.append(remind_2h_sent)
+        if remind_last_daily_sent is not None:
+            updates.append("remind_last_daily_sent = ?")
+            params.append(remind_last_daily_sent)
         if not updates:
             return
 

@@ -7,6 +7,7 @@ def main_keyboard() -> ReplyKeyboardMarkup:
         keyboard=[
             [KeyboardButton(text="➕ Добавить")],
             [KeyboardButton(text="📅 Сегодня"), KeyboardButton(text="📋 Список")],
+            [KeyboardButton(text="✅ Завершённые")],
         ],
         resize_keyboard=True,
     )

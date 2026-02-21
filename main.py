@@ -87,6 +87,7 @@ async def send_welcome(message: Message) -> None:
         "/add — добавить задачу\n"
         "/today — задачи на сегодня\n"
         "/list — все активные задачи\n"
+        "/completed — завершённые задачи\n"
         "/help — помощь"
     )
     await message.answer(text, reply_markup=main_keyboard())
@@ -116,7 +117,8 @@ def register_handlers(dp: Dispatcher, db: Database, timezone: str) -> None:
             "ℹ️ Быстрые команды:\n"
             "/add — добавить задачу\n"
             "/today — показать задачи на сегодня\n"
-            "/list — показать все активные задачи"
+            "/list — показать все активные задачи\n"
+            "/completed — показать завершённые задачи"
         )
 
     @dp.message(Command("add"))
@@ -197,6 +199,20 @@ def register_handlers(dp: Dispatcher, db: Database, timezone: str) -> None:
         tasks = db.get_active_tasks(user_id)
         await send_task_list(message, tasks, timezone, "📋 Активные задачи:")
 
+
+    @dp.message(Command("completed"))
+    @dp.message(F.text == "✅ Завершённые")
+    async def completed_handler(message: Message) -> None:
+        user_id = message.from_user.id if message.from_user else 0
+        tasks = db.get_completed_tasks(user_id)
+        if not tasks:
+            await message.answer("Завершённых задач пока нет 🙂")
+            return
+
+        await message.answer("✅ Завершённые задачи:")
+        for idx, task in enumerate(tasks, start=1):
+            await message.answer(task_card(task, timezone, idx=idx))
+
     @dp.callback_query(F.data.startswith("done:"))
     async def done_handler(callback: CallbackQuery) -> None:
         task_id = int(callback.data.split(":", maxsplit=1)[1])
@@ -240,7 +256,7 @@ async def main() -> None:
     dp = Dispatcher(storage=MemoryStorage())
 
     register_handlers(dp, db, cfg.timezone)
-    scheduler = setup_scheduler(bot, db, cfg.timezone)
+    scheduler = setup_scheduler(bot, db, cfg.timezone, cfg.daily_reminder_hour)
 
     logger.info("StudyPing bot started")
     try:
