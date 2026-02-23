@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyPing Mini App</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <main class="app">
+    <h1>StudyPing Mini App 📚</h1>
+    <p id="hello"></p>
+
+    <form id="task-form">
+      <input id="subject" placeholder="Предмет" required />
+      <input id="text" placeholder="Что сделать" required />
+      <button type="submit">Добавить локально</button>
+    </form>
+
+    <ul id="list"></ul>
+    <small>Это демо-Mini App для хостинга на твоём сайте. Данные хранятся в localStorage.</small>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
