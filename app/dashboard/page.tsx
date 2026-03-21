@@ -10,6 +10,7 @@ import { ProgressChart } from '@/components/dashboard/progress-chart';
 import { Button } from '@/components/ui/button';
 import { formatPercent } from '@/lib/utils';
 import { FamilyMembersManager } from '@/components/dashboard/family-members-manager';
+import { LeaveFamilyButton } from '@/components/dashboard/leave-family-button';
 import { getViewerAccess, isFamilyPlan } from '@/lib/access';
 
 const tariffPlans = [
@@ -180,7 +181,7 @@ export default async function DashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Семейный доступ</CardTitle>
-                <CardDescription>Можно добавить до 3 человек по email, если они уже зарегистрированы в базе.</CardDescription>
+                <CardDescription>Можно добавить до 3 человек по email, если у них нет собственного активного тарифа и они не состоят в другой семье.</CardDescription>
               </CardHeader>
               <CardContent>
                 <FamilyMembersManager members={access.familyMembers} />
@@ -194,7 +195,7 @@ export default async function DashboardPage() {
                 <CardTitle className="flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Вы в семейном тарифе</CardTitle>
                 <CardDescription>Покупка собственного тарифа недоступна, пока вы состоите в семье.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
+              <CardContent className="space-y-4 text-sm">
                 <p className="text-muted-foreground">Организатор: <span className="font-medium text-foreground">{access.familyOwner.name}</span> · {access.familyOwner.email}</p>
                 <div className="space-y-2">
                   {access.familyGroup.map((member) => (
@@ -204,6 +205,7 @@ export default async function DashboardPage() {
                     </div>
                   ))}
                 </div>
+                <LeaveFamilyButton />
               </CardContent>
             </Card>
           ) : null}

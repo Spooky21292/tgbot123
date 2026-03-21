@@ -1,11 +1,16 @@
+import { getServerSession } from 'next-auth';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { Container } from '@/components/layout/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default async function WebinarPage({ params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) redirect('/auth/register');
+
   const webinar = await db.webinar.findUnique({ where: { id: params.id } });
   if (!webinar) notFound();
 

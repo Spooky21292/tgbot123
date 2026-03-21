@@ -1,16 +1,19 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getServerSession } from 'next-auth';
 import { getBlogPosts } from '@/lib/data';
 import { Container } from '@/components/layout/container';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { authOptions } from '@/lib/auth';
 
 export const metadata: Metadata = { title: 'Блог', description: 'Статьи о бюджете, инфляции, налогах и привычках' };
 
 export default async function BlogPage({ searchParams }: { searchParams?: { search?: string } }) {
-  const posts = await getBlogPosts(searchParams?.search);
+  const [posts, session] = await Promise.all([getBlogPosts(searchParams?.search), getServerSession(authOptions)]);
+  const articleHref = (slug: string) => session?.user ? `/blog/${slug}` : '/auth/register';
 
   return (
     <Container className="py-10 sm:py-12">
@@ -34,7 +37,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: { sear
             <CardContent className="mt-auto flex flex-col">
               <p className="mb-4 text-sm text-muted-foreground">Категория: {post.category}</p>
               <Button className="self-start" asChild>
-                <Link href={`/blog/${post.slug}`}>Читать</Link>
+                <Link href={articleHref(post.slug)}>Читать</Link>
               </Button>
             </CardContent>
           </Card>

@@ -12,8 +12,8 @@ export const metadata: Metadata = { title: 'Тарифы', description: 'Тар�
 
 const plans = [
   { id: 'start', name: 'Starter', price: '0 ₽', period: '/мес', description: 'Подходит для спокойного знакомства с платформой.', features: ['Открытые статьи и вводные материалы', 'Знакомство с интерфейсом', 'Базовые сценарии Telegram-ассистента'] },
-  { id: 'learning', name: 'Learning', price: '499 ₽', period: '/мес', description: 'Полный доступ к обучению и библиотеке записей.', features: ['Все курсы и уроки', 'Тесты, прогресс и рекомендации', 'Все вебинары и доступ к записям'] },
-  { id: 'family', name: 'Family', price: '999 ₽', period: '/мес', description: 'Для семьи с единым доступом к материалам.', features: ['До 3 пользователей в семье', 'Семейные сценарии и рекомендации', 'Архив вебинаров и семейный доступ к записям'] }
+  { id: 'learning', name: 'Learning', price: '499 ₽', period: '/мес', description: 'Полный доступ к обучению и библиотеке записей.', promo: 'Промокод: TESTPROMO', features: ['Все курсы и уроки', 'Тесты, прогресс и рекомендации', 'Все вебинары и доступ к записям'] },
+  { id: 'family', name: 'Family', price: '999 ₽', period: '/мес', description: 'Для семьи с единым доступом к материалам.', promo: 'Промокод: TESTPROMO', features: ['До 3 пользователей в семье', 'Семейные сценарии и рекомендации', 'Архив вебинаров и семейный доступ к записям'] }
 ];
 
 export default async function PricingPage({ searchParams }: { searchParams?: { plan?: string } }) {
@@ -35,6 +35,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { p
                 <div>
                   <h2 className="text-lg font-medium tracking-tighter text-gray-600 dark:text-slate-300 lg:text-3xl">{plan.name}</h2>
                   <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">{plan.description}</p>
+                  {'promo' in plan ? <p className="mt-3 text-sm font-medium text-primary">{plan.promo}</p> : null}
                 </div>
                 <div className="mt-6">
                   <p>
