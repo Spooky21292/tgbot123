@@ -9,6 +9,7 @@ import { ThemeToggle } from './theme-toggle';
 
 const links = [
   ['Курсы', '/courses'],
+  ['Демо-трейд', '/trade'],
   ['Блог', '/blog'],
   ['Вебинары', '/webinars']
 ];

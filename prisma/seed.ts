@@ -210,6 +210,10 @@ function getQuizQuestions(title: string) {
 }
 
 async function main() {
+  await prisma.trade.deleteMany();
+  await prisma.position.deleteMany();
+  await prisma.demoAccount.deleteMany();
+  await prisma.asset.deleteMany();
   await prisma.quizResult.deleteMany();
   await prisma.userProgress.deleteMany();
   await prisma.webinarEnrollment.deleteMany();
@@ -231,6 +235,40 @@ async function main() {
     prisma.user.create({ data: { name: 'Максим Беляев', email: 'young@finskills.pro', passwordHash, ageGroup: '18-25' } }),
     prisma.user.create({ data: { name: 'Елена Соколова', email: 'adult@finskills.pro', passwordHash, ageGroup: '26+' } })
   ]);
+
+  const [aapl, tsla, nvda, btc, eth, eurusd] = await Promise.all([
+    prisma.asset.create({ data: { symbol: 'AAPL', name: 'Apple Inc.', type: 'stock' } }),
+    prisma.asset.create({ data: { symbol: 'TSLA', name: 'Tesla, Inc.', type: 'stock' } }),
+    prisma.asset.create({ data: { symbol: 'NVDA', name: 'NVIDIA Corporation', type: 'stock' } }),
+    prisma.asset.create({ data: { symbol: 'BTC/USD', name: 'Bitcoin / US Dollar', type: 'crypto' } }),
+    prisma.asset.create({ data: { symbol: 'ETH/USD', name: 'Ethereum / US Dollar', type: 'crypto' } }),
+    prisma.asset.create({ data: { symbol: 'EUR/USD', name: 'Euro / US Dollar', type: 'forex' } })
+  ]);
+
+  const [adminDemo, teenDemo, youngDemo, adultDemo] = await Promise.all([
+    prisma.demoAccount.create({ data: { userId: admin.id, balance: 100000, initialBalance: 100000, currency: 'USD' } }),
+    prisma.demoAccount.create({ data: { userId: teenUser.id, balance: 100000, initialBalance: 100000, currency: 'USD' } }),
+    prisma.demoAccount.create({ data: { userId: youngUser.id, balance: 94783.5, initialBalance: 100000, currency: 'USD' } }),
+    prisma.demoAccount.create({ data: { userId: adultUser.id, balance: 100000, initialBalance: 100000, currency: 'USD' } })
+  ]);
+
+  await prisma.position.createMany({
+    data: [
+      { accountId: youngDemo.id, assetId: aapl.id, quantity: 12, averagePrice: 198.4 },
+      { accountId: youngDemo.id, assetId: btc.id, quantity: 0.08, averagePrice: 65520 },
+      { accountId: youngDemo.id, assetId: eurusd.id, quantity: 1500, averagePrice: 1.084 }
+    ]
+  });
+
+  await prisma.trade.createMany({
+    data: [
+      { accountId: youngDemo.id, assetId: aapl.id, side: 'BUY', quantity: 12, price: 198.4, total: 2380.8, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: btc.id, side: 'BUY', quantity: 0.08, price: 65520, total: 5241.6, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: eurusd.id, side: 'BUY', quantity: 1500, price: 1.084, total: 1626, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: tsla.id, side: 'BUY', quantity: 6, price: 171.5, total: 1029, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: tsla.id, side: 'SELL', quantity: 2, price: 176.2, total: 352.4, realizedPnl: 9.4 }
+    ]
+  });
 
   for (const template of courseTemplates) {
     const course = await prisma.course.create({
@@ -309,7 +347,7 @@ async function main() {
   const firstWebinar = await prisma.webinar.findFirstOrThrow();
   await prisma.webinarEnrollment.create({ data: { userId: adultUser.id, webinarId: firstWebinar.id } });
 
-  console.log({ admin: admin.email, demoUsers: [teenUser.email, youngUser.email, adultUser.email] });
+  console.log({ admin: admin.email, demoUsers: [teenUser.email, youngUser.email, adultUser.email], demoTradingAssets: [aapl.symbol, tsla.symbol, nvda.symbol, btc.symbol, eth.symbol, eurusd.symbol], demoAccounts: [adminDemo.id, teenDemo.id, youngDemo.id, adultDemo.id] });
 }
 
 main()
