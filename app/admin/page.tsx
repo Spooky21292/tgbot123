@@ -22,5 +22,5 @@ export default async function AdminPage() {
     ['Вебинары', webinars.map((item) => `${item.title} — ${new Date(item.date).toLocaleDateString('ru-RU')}`)],
     ['Заявки', contacts.map((item) => `${item.name} — ${item.email}`)],
     ['Статьи', articles.map((item) => `${item.title} — ${item.category}`)]
-  ].map(([title, items]) => <Card key={String(title)}><CardHeader><CardTitle>{String(title)}</CardTitle></CardHeader><CardContent className="space-y-2 text-sm text-muted-foreground">{(items as string[]).length ? (items as string[]).map((item) => <p key={item}>{item}</p>) : <p>Пока пусто.</p>}</CardContent></Card>)}</div><p className="mt-8 text-sm text-muted-foreground">Для MVP админ-панель даёт рабочий обзор сущностей. CRUD-операции реализованы через API и могут быть расширены формами на отдельных страницах.</p></Container>;
+  ].map(([title, items]) => <Card key={String(title)}><CardHeader><CardTitle>{String(title)}</CardTitle></CardHeader><CardContent className="space-y-2 text-sm text-muted-foreground">{(items as string[]).length ? (items as string[]).map((item) => <p key={item}>{item}</p>) : <p>Пока пусто.</p>}</CardContent></Card>)}</div><p className="mt-8 text-sm text-muted-foreground">Админ-панель собрана как операционный центр: здесь видны пользователи, курсы, вебинары, обращения и контент блога.</p></Container>;
 }

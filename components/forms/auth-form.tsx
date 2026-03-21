@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -27,17 +27,18 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
     reset
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    mode: 'onBlur',
+    mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues:
       mode === 'login'
         ? { email: '', password: '' }
-        : { name: '', email: '', password: '', ageGroup: 'young' }
+        : { name: '', email: '', password: '', ageGroup: 'age_18_25' }
   });
 
   const onSubmit = handleSubmit((values) => {
@@ -53,7 +54,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
           return toast.error(typeof data.error === 'string' ? data.error : 'Ошибка регистрации');
         }
         toast.success('Аккаунт создан');
-        reset({ email: values.email, password: values.password });
+        const registeredValues = values as RegisterInput;
+        reset({
+          name: '',
+          email: registeredValues.email,
+          password: registeredValues.password,
+          ageGroup: registeredValues.ageGroup
+        } as FormValues);
       }
 
       const result = await signIn('credentials', {
@@ -70,9 +77,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
   });
 
   return (
-    <Card className="mx-auto w-full max-w-md">
+    <Card className="mx-auto w-full max-w-md rounded-[28px] border-slate-200/80 shadow-soft">
       <CardHeader>
-        <CardTitle>{mode === 'login' ? 'Вход' : 'Регистрация'}</CardTitle>
+        <CardTitle>{mode === 'login' ? 'Вход в FinSkills Pro' : 'Создать аккаунт'}</CardTitle>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={onSubmit} noValidate>
@@ -89,23 +96,34 @@ export function AuthForm({ mode }: { mode: Mode }) {
           </div>
 
           <div>
-            <Input type="password" placeholder="Пароль" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} {...register('password')} />
+            <Input
+              type="password"
+              placeholder="Пароль"
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              {...register('password')}
+            />
             <p className="mt-1 text-xs text-red-500">{errors.password?.message as string}</p>
           </div>
 
           {mode === 'register' && (
             <div>
-              <Select {...register('ageGroup' as const)}>
-                <option value="teen">Подросток</option>
-                <option value="young">18–30 лет</option>
-                <option value="adult">30–45 лет</option>
-              </Select>
+              <Controller
+                control={control}
+                name={'ageGroup' as const}
+                render={({ field }) => (
+                  <Select value={field.value ?? 'age_18_25'} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref}>
+                    <option value="age_12_17">12–17</option>
+                    <option value="age_18_25">18–25</option>
+                    <option value="age_26_plus">26+</option>
+                  </Select>
+                )}
+              />
               <p className="mt-1 text-xs text-red-500">{errors.ageGroup?.message as string}</p>
             </div>
           )}
 
           <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? 'Подождите...' : mode === 'login' ? 'Войти' : 'Создать аккаунт'}
+            {pending ? 'Подождите...' : mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
           </Button>
         </form>
       </CardContent>

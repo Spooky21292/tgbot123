@@ -3,13 +3,15 @@ import { z } from 'zod';
 const requiredText = (message: string, min = 1) =>
   z.string({ required_error: message }).trim().min(min, message);
 
+const ageGroupSchema = z.enum(['age_12_17', 'age_18_25', 'age_26_plus'], {
+  required_error: 'Выберите возрастную группу'
+});
+
 export const registerSchema = z.object({
   name: requiredText('Укажите имя', 2),
   email: requiredText('Укажите email').email('Некорректный email'),
   password: requiredText('Укажите пароль', 6),
-  ageGroup: z.enum(['teen', 'young', 'adult'], {
-    required_error: 'Выберите возрастную группу'
-  })
+  ageGroup: ageGroupSchema
 });
 
 export const loginSchema = z.object({
@@ -27,7 +29,7 @@ export const courseSchema = z.object({
   title: requiredText('Укажите название', 3),
   slug: requiredText('Укажите slug', 3),
   description: requiredText('Укажите описание', 10),
-  ageGroup: z.enum(['teen', 'young', 'adult']),
+  ageGroup: ageGroupSchema,
   level: z.enum(['beginner', 'intermediate', 'advanced']),
   coverImage: z.string().url('Введите корректный URL'),
   isPublished: z.boolean().default(true)

@@ -17,8 +17,16 @@ export function getQuizFeedback(score: number) {
 
 export function ageGroupLabel(ageGroup: string) {
   return {
-    teen: '12–17 лет',
-    young: '18–30 лет',
-    adult: '30–45 лет'
+    age_12_17: '12–17',
+    age_18_25: '18–25',
+    age_26_plus: '26+'
   }[ageGroup] ?? ageGroup;
+}
+
+export function courseLevelLabel(level: string) {
+  return {
+    beginner: 'Старт',
+    intermediate: 'Практика',
+    advanced: 'Продвинутый'
+  }[level] ?? level;
 }

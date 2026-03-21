@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: 'Онлайн-платформа по финансовой грамотности: курсы, тесты, вебинары и Telegram-ассистент.',
   openGraph: {
     title: 'FinSkills Pro',
-    description: 'MVP-платформа по финансовой грамотности для подростков, молодых людей и взрослых.',
+    description: 'Платформа по финансовой грамотности для пользователей 12–17, 18–25 и 26+.',
     type: 'website'
   }
 };

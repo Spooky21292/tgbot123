@@ -22,7 +22,7 @@ export function HeroSection() {
     <section className="bg-hero-gradient py-24 text-white">
       <Container className="grid items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <div>
-          <Badge className="bg-white/10 text-white">Финансовая грамотность для 12–45 лет</Badge>
+          <Badge className="bg-white/10 text-white">Для 12–17, 18–25 и 26+</Badge>
           <h1 className="mt-6 text-5xl font-semibold leading-tight sm:text-6xl">FinSkills Pro — современная онлайн-школа по деньгам, бюджету и осознанным решениям.</h1>
           <p className="mt-6 max-w-2xl text-lg text-slate-200">Видео, тесты, вебинары и Telegram-ассистент помогают выстроить финансовые привычки без давления и нереалистичных обещаний.</p>
           <div className="mt-8 flex flex-wrap gap-4">

@@ -8,9 +8,9 @@ datasource db {
 }
 
 enum AgeGroup {
-  teen
-  young
-  adult
+  age_12_17
+  age_18_25
+  age_26_plus
 }
 
 enum Role {
