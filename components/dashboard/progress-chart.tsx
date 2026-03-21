@@ -1,24 +1,29 @@
 "use client";
 
-import { ResponsiveContainer, AreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
+import { ResponsiveContainer, ComposedChart, Area, Bar, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
-export function ProgressChart({ data }: { data: { name: string; progress: number }[] }) {
+export function ProgressChart({ data }: { data: { label: string; lessons: number; active: number }[] }) {
   return (
-    <div className="h-56 w-full">
+    <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+        <ComposedChart data={data} margin={{ top: 10, right: 8, left: -14, bottom: 0 }}>
           <defs>
-            <linearGradient id="progress" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#1e293b" stopOpacity={0.18} />
-              <stop offset="95%" stopColor="#1e293b" stopOpacity={0} />
+            <linearGradient id="activityFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#1d4ed8" stopOpacity={0.28} />
+              <stop offset="95%" stopColor="#1d4ed8" stopOpacity={0.03} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#e2e8f0" />
-          <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} stroke="#64748b" />
-          <YAxis unit="%" tickLine={false} axisLine={false} fontSize={12} stroke="#64748b" width={36} />
-          <Tooltip />
-          <Area type="monotone" dataKey="progress" stroke="#1e293b" strokeWidth={2} fill="url(#progress)" />
-        </AreaChart>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#cbd5e1" />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} stroke="#64748b" minTickGap={18} />
+          <YAxis tickLine={false} axisLine={false} fontSize={12} stroke="#64748b" width={34} allowDecimals={false} />
+          <Tooltip
+            contentStyle={{ borderRadius: 16, borderColor: '#cbd5e1', backgroundColor: '#ffffff' }}
+            labelStyle={{ color: '#0f172a', fontWeight: 600 }}
+            formatter={(value: number, name: string) => [value, name === 'lessons' ? 'Уроков' : 'Учебных дней']}
+          />
+          <Bar dataKey="active" name="active" barSize={10} radius={[8, 8, 0, 0]} fill="#93c5fd" />
+          <Area type="monotone" dataKey="lessons" name="lessons" stroke="#1d4ed8" strokeWidth={2.5} fill="url(#activityFill)" />
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

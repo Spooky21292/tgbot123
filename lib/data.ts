@@ -58,14 +58,3 @@ export async function getBlogPosts(filters?: { search?: string; category?: strin
     orderBy: { createdAt: 'desc' }
   });
 }
-
-export async function getBlogCategories() {
-  const categories = await db.article.findMany({
-    where: { isPublished: true },
-    select: { category: true },
-    distinct: ['category'],
-    orderBy: { category: 'asc' }
-  });
-
-  return categories.map((item) => item.category);
-}

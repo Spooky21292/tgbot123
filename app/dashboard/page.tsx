@@ -22,9 +22,10 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect('/auth/login');
 
-  const [courses, progress, webinars, access] = await Promise.all([
-    db.course.findMany({ where: { isPublished: true }, include: { lessons: { orderBy: { order: 'asc' } } }, take: 6 }),
+  const [courses, progress, quizResults, webinars, access] = await Promise.all([
+    db.course.findMany({ where: { isPublished: true }, include: { lessons: { orderBy: { order: 'asc' } } }, take: 10 }),
     db.userProgress.findMany({ where: { userId: session.user.id }, include: { lesson: { include: { course: true } } }, orderBy: { completedAt: 'desc' } }),
+    db.quizResult.findMany({ where: { userId: session.user.id }, orderBy: { createdAt: 'desc' }, take: 30 }),
     db.webinar.findMany({ where: { isPublished: true }, orderBy: { date: 'asc' }, take: 2 }),
     getViewerAccess(session.user.id)
   ]);
@@ -47,13 +48,33 @@ export default async function DashboardPage() {
       meta: `${item.lesson.course.title} · ${item.completedAt ? new Date(item.completedAt).toLocaleDateString('ru-RU') : 'Сегодня'}`
     }));
 
-  const chartData = courses.slice(0, 4).map((course) => {
-    const completed = course.lessons.filter((lesson) => completedLessonIds.has(lesson.id)).length;
-    return {
-      name: course.title.split(' ').slice(0, 2).join(' '),
-      progress: course.lessons.length ? Math.round((completed / course.lessons.length) * 100) : 0
-    };
-  });
+  const activityMap = new Map<string, { label: string; lessons: number; active: number }>();
+  for (let offset = 29; offset >= 0; offset -= 1) {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - offset);
+    const key = date.toISOString().slice(0, 10);
+    activityMap.set(key, { label: date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), lessons: 0, active: 0 });
+  }
+
+  for (const item of progress.filter((entry) => entry.completed && entry.completedAt)) {
+    const key = new Date(item.completedAt as Date).toISOString().slice(0, 10);
+    const current = activityMap.get(key);
+    if (current) {
+      current.lessons += 1;
+      current.active = 1;
+    }
+  }
+
+  for (const item of quizResults) {
+    const key = new Date(item.createdAt).toISOString().slice(0, 10);
+    const current = activityMap.get(key);
+    if (current) current.active = 1;
+  }
+
+  const chartData = [...activityMap.values()];
+  const activeDays = chartData.filter((item) => item.active > 0).length;
+  const viewedLessonsMonth = chartData.reduce((sum, item) => sum + item.lessons, 0);
 
   return (
     <Container className="py-10 sm:py-12">
@@ -69,7 +90,7 @@ export default async function DashboardPage() {
         {[
           ['Общий прогресс', formatPercent(completion)],
           ['Начатые курсы', String(startedCourses)],
-          ['Пройдено уроков', String(completedLessonIds.size)],
+          ['Учебных дней за месяц', String(activeDays)],
           ['Доступ', access?.accessActive ? `до ${new Date(access.accessExpiresAt ?? '').toLocaleDateString('ru-RU')}` : 'не активен']
         ].map(([label, value]) => (
           <Card key={label}>
@@ -81,7 +102,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="mt-8 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <Card>
           <CardHeader>
             <CardTitle>Продолжить обучение</CardTitle>
@@ -110,10 +131,20 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Прогресс</CardTitle>
-            <CardDescription>Компактный график по главным курсам.</CardDescription>
+            <CardTitle>Активность за 30 дней</CardTitle>
+            <CardDescription>График показывает, в какие дни вы заходили в обучение и сколько уроков закрывали.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-border/80 bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">Просмотрено уроков за месяц</p>
+                <p className="mt-2 text-2xl font-semibold text-foreground">{viewedLessonsMonth}</p>
+              </div>
+              <div className="rounded-2xl border border-border/80 bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">Активных учебных дней</p>
+                <p className="mt-2 text-2xl font-semibold text-foreground">{activeDays}</p>
+              </div>
+            </div>
             <ProgressChart data={chartData} />
           </CardContent>
         </Card>
