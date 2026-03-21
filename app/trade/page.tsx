@@ -117,15 +117,15 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
           ))}
         </div>
 
-        <div className="mt-8 grid gap-5 xl:grid-cols-[0.95fr_0.85fr]">
+        <div className="mt-8 grid gap-4 xl:grid-cols-[0.88fr_0.78fr]">
           <Card>
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /> Портфель</CardTitle>
               <CardDescription>Открытые позиции и текущая оценка по рынку.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 pt-0">
+            <CardContent className="space-y-3 pt-0">
               {data.positions.length ? data.positions.map(({ position, quote, marketValue, unrealizedPnl }) => (
-                <div key={position.id} className="flex flex-col gap-3 rounded-xl border border-border/80 bg-muted/20 p-4 md:flex-row md:items-center md:justify-between">
+                <div key={position.id} className="flex flex-col gap-3 rounded-xl border border-border/80 bg-muted/20 p-3.5 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="font-medium text-foreground">{position.asset.symbol}</p>
                     <p className="text-sm text-muted-foreground">{position.asset.name}</p>
@@ -157,7 +157,7 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
           </Card>
 
           <Card>
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2"><ArrowRightLeft className="h-4 w-4 text-primary" /> Watchlist</CardTitle>
               <CardDescription>Набор активов для спокойной учебной практики.</CardDescription>
             </CardHeader>
@@ -192,7 +192,7 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
 
               <div className="space-y-3">
                 {data.watchlist.length ? data.watchlist.map(({ asset, quote }) => (
-                  <Link key={asset.id} href={`/trade/${encodeURIComponent(asset.symbol)}`} className="flex items-center justify-between rounded-xl border border-border/80 px-4 py-3 transition-colors hover:bg-muted/30">
+                  <Link key={asset.id} href={`/trade/${encodeURIComponent(asset.symbol)}`} className="flex items-center justify-between rounded-xl border border-border/80 px-3.5 py-2.5 transition-colors hover:bg-muted/30">
                     <div>
                       <p className="font-medium text-foreground">{asset.symbol}</p>
                       <p className="text-sm text-muted-foreground">{asset.name}</p>

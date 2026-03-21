@@ -18,6 +18,7 @@ type CourseSeed = {
   age: string;
   level: string;
   cover: string;
+  isPremium?: boolean;
   lessons: LessonSeed[];
 };
 
@@ -29,6 +30,7 @@ const courseTemplates: CourseSeed[] = [
     age: "14-17",
     level: "beginner",
     cover: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80",
+    isPremium: false,
     lessons: [
       {
         title: "Что такое деньги и зачем они нужны",
@@ -99,6 +101,7 @@ const courseTemplates: CourseSeed[] = [
     age: "18-25",
     level: "intermediate",
     cover: "https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1200&q=80",
+    isPremium: true,
     lessons: [
       {
         title: "Первая зарплата без ощущения, что всё исчезло за неделю",
@@ -139,6 +142,7 @@ const courseTemplates: CourseSeed[] = [
     age: "26+",
     level: "advanced",
     cover: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1200&q=80",
+    isPremium: true,
     lessons: [
       {
         title: "Финансовая устойчивость семьи: с чего начать",
@@ -279,7 +283,8 @@ async function main() {
         ageGroup: template.age,
         level: template.level,
         coverImage: template.cover,
-        isPublished: true
+        isPublished: true,
+        isPremium: template.isPremium ?? false
       }
     });
 

@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Check } from 'lucide-react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { Container } from '@/components/layout/container';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ActivatePlanForm } from '@/components/pricing/activate-plan-form';
 
 export const metadata: Metadata = { title: 'Тарифы', description: 'Тарифы FinSkills Pro' };
 
@@ -13,13 +16,15 @@ const plans = [
   { id: 'family', name: 'Family', price: '999 ₽', period: '/мес', description: 'Для семьи с единым доступом к материалам.', features: ['До 3 пользователей в семье', 'Семейные сценарии и рекомендации', 'Архив вебинаров и семейный доступ к записям'] }
 ];
 
-export default function PricingPage({ searchParams }: { searchParams?: { plan?: string } }) {
+export default async function PricingPage({ searchParams }: { searchParams?: { plan?: string } }) {
+  const session = await getServerSession(authOptions);
+
   return (
     <Container className="py-10 sm:py-12">
       <div className="max-w-2xl">
         <h1 className="text-4xl font-semibold tracking-tight text-foreground">Тарифы</h1>
         <p className="mt-3 text-base leading-7 text-muted-foreground">
-          Выберите тариф и перейдите к оплате. Вебинары уже входят в доступ и сохраняются в записи.
+          Выберите тариф и перейдите к оплате. Для тестовой активации используйте код <span className="font-semibold text-foreground">TESTPROMO</span> — он даёт 31 день доступа.
         </p>
       </div>
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
@@ -48,11 +53,15 @@ export default function PricingPage({ searchParams }: { searchParams?: { plan?: 
                   </div>
                 ))}
               </div>
-              <Button className="mt-auto w-full rounded-full" asChild>
-                <Link href={searchParams?.plan === plan.id ? '/dashboard' : `/pricing?plan=${plan.id}`}>
-                  {searchParams?.plan === plan.id ? 'Перейти к оплате' : 'Выбрать тариф'}
-                </Link>
-              </Button>
+              {session?.user && searchParams?.plan === plan.id && plan.id !== 'start' ? (
+                <ActivatePlanForm planId={plan.id} />
+              ) : (
+                <Button className="mt-auto w-full rounded-full" asChild>
+                  <Link href={plan.id === 'start' ? '/courses' : `/pricing?plan=${plan.id}`}>
+                    {plan.id === 'start' ? 'Открыть каталог' : 'Выбрать тариф'}
+                  </Link>
+                </Button>
+              )}
             </CardContent>
           </Card>
         ))}

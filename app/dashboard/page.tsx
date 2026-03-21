@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarClock, CheckCircle2, CreditCard } from 'lucide-react';
+import { ArrowRight, CalendarClock, CheckCircle2, CreditCard, Users } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ProgressChart } from '@/components/dashboard/progress-chart';
 import { Button } from '@/components/ui/button';
 import { formatPercent } from '@/lib/utils';
+import { FamilyMembersManager } from '@/components/dashboard/family-members-manager';
+import { getViewerAccess, isFamilyPlan } from '@/lib/access';
 
 const tariffPlans = [
   { id: 'learning', name: 'Learning', price: '499 ₽ / мес', text: 'Полный доступ ко всем курсам, вебинарам и записям.' },
@@ -19,10 +21,11 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect('/auth/login');
 
-  const [courses, progress, webinars] = await Promise.all([
+  const [courses, progress, webinars, access] = await Promise.all([
     db.course.findMany({ where: { isPublished: true }, include: { lessons: { orderBy: { order: 'asc' } } }, take: 6 }),
     db.userProgress.findMany({ where: { userId: session.user.id }, include: { lesson: { include: { course: true } } }, orderBy: { completedAt: 'desc' } }),
-    db.webinar.findMany({ where: { isPublished: true }, orderBy: { date: 'asc' }, take: 2 })
+    db.webinar.findMany({ where: { isPublished: true }, orderBy: { date: 'asc' }, take: 2 }),
+    getViewerAccess(session.user.id)
   ]);
 
   const completedLessonIds = new Set(progress.filter((item) => item.completed).map((item) => item.lessonId));
@@ -61,11 +64,12 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
+      <div className="mt-8 grid gap-4 md:grid-cols-4">
         {[
           ['Общий прогресс', formatPercent(completion)],
           ['Начатые курсы', String(startedCourses)],
-          ['Пройдено уроков', String(completedLessonIds.size)]
+          ['Пройдено уроков', String(completedLessonIds.size)],
+          ['Доступ', access?.accessActive ? `до ${new Date(access.accessExpiresAt ?? '').toLocaleDateString('ru-RU')}` : 'не активен']
         ].map(([label, value]) => (
           <Card key={label}>
             <CardContent className="pt-6">
@@ -139,36 +143,50 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <div>
-          <div className="mb-4 flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-primary" />
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">Тарифы и оплата</h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {tariffPlans.map((plan) => (
-              <Card key={plan.id} id={plan.id} className="rounded-[28px] bg-white/90 dark:bg-card">
-                <CardHeader className="px-6 py-8 sm:p-8 sm:pb-6">
-                  <div className="grid w-full grid-cols-1 items-center justify-center text-left">
-                    <div>
-                      <h3 className="text-lg font-medium tracking-tight text-slate-600 dark:text-slate-300 lg:text-2xl">{plan.name}</h3>
-                      <p className="mt-2 text-sm text-muted-foreground">{plan.text}</p>
+        <div className="space-y-6">
+          <div>
+            <div className="mb-4 flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-primary" />
+              <h2 className="text-lg font-semibold tracking-tight text-foreground">Тарифы и оплата</h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {tariffPlans.map((plan) => (
+                <Card key={plan.id} id={plan.id} className="rounded-[28px] bg-white/90 dark:bg-card">
+                  <CardHeader className="px-6 py-8 sm:p-8 sm:pb-6">
+                    <div className="grid w-full grid-cols-1 items-center justify-center text-left">
+                      <div>
+                        <h3 className="text-lg font-medium tracking-tight text-slate-600 dark:text-slate-300 lg:text-2xl">{plan.name}</h3>
+                        <p className="mt-2 text-sm text-muted-foreground">{plan.text}</p>
+                      </div>
+                      <div className="mt-6">
+                        <p>
+                          <span className="text-4xl font-light tracking-tight text-foreground">{plan.price.split(' / ')[0]}</span>
+                          <span className="text-base font-medium text-muted-foreground"> / {plan.price.split(' / ')[1]}</span>
+                        </p>
+                      </div>
                     </div>
-                    <div className="mt-6">
-                      <p>
-                        <span className="text-4xl font-light tracking-tight text-foreground">{plan.price.split(' / ')[0]}</span>
-                        <span className="text-base font-medium text-muted-foreground"> / {plan.price.split(' / ')[1]}</span>
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex px-6 pb-8 sm:px-8">
-                  <Button className="w-full rounded-full" asChild>
-                    <Link href={`/pricing?plan=${plan.id}`}>Оплатить тариф</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardHeader>
+                  <CardContent className="flex px-6 pb-8 sm:px-8">
+                    <Button className="w-full rounded-full" asChild>
+                      <Link href={`/pricing?plan=${plan.id}`}>Оплатить тариф</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
+
+          {access && isFamilyPlan(access) ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Семейный доступ</CardTitle>
+                <CardDescription>Можно добавить до 3 человек по email, если они уже зарегистрированы в базе.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FamilyMembersManager members={access.familyMembers} />
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
       </div>
     </Container>

@@ -50,8 +50,7 @@ export function LiveAssetPrice({ symbol, initialQuote }: Props) {
 
   return (
     <div className="rounded-2xl border border-border/80 bg-card px-5 py-4">
-      <p className="text-sm text-muted-foreground">Текущая цена</p>
-      <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">{formatPrice(symbol, quote.price)}</p>
+      <p className="text-3xl font-semibold tracking-tight text-foreground">{formatPrice(symbol, quote.price)}</p>
       {status === 'error' ? <p className="mt-2 text-xs text-muted-foreground">Данные временно недоступны</p> : null}
     </div>
   );

@@ -11,12 +11,17 @@ import { Input } from '@/components/ui/input';
 import { getCourses } from '@/lib/data';
 import { authOptions } from '@/lib/auth';
 import { ageGroupLabel, courseLevelLabel } from '@/lib/utils';
+import { getViewerAccess } from '@/lib/access';
 
 export const metadata: Metadata = { title: 'Курсы', description: 'Каталог курсов по финансовой грамотности' };
 
 export default async function CoursesPage({ searchParams }: { searchParams?: { ageGroup?: string; level?: string; search?: string } }) {
   const session = await getServerSession(authOptions);
-  const courses = await getCourses({ ...searchParams, preferredAgeGroup: session?.user?.ageGroup });
+  const [courses, access] = await Promise.all([
+    getCourses({ ...searchParams, preferredAgeGroup: session?.user?.ageGroup }),
+    session?.user ? getViewerAccess(session.user.id) : Promise.resolve(null)
+  ]);
+  const accessActive = Boolean(access?.accessActive);
 
   return (
     <Container className="py-10 sm:py-12">
@@ -60,9 +65,15 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
               </CardHeader>
               <CardContent className="mt-auto flex flex-col">
                 <p className="mb-4 text-sm text-muted-foreground">{course.lessons.length} уроков · структурированная траектория</p>
-                <Button className="self-start" asChild>
-                  <Link href={`/courses/${course.slug}`}>Открыть</Link>
-                </Button>
+                {course.isPremium && !accessActive ? (
+                  <Button className="self-start" variant="secondary" asChild>
+                    <Link href="/pricing?plan=learning">🔒 Открыть по тарифу</Link>
+                  </Button>
+                ) : (
+                  <Button className="self-start" asChild>
+                    <Link href={`/courses/${course.slug}`}>Открыть</Link>
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))

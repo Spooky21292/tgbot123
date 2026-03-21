@@ -14,11 +14,17 @@ model User {
   passwordHash       String
   ageGroup           String
   role               String              @default("user")
+  activePlan         String?
+  planExpiresAt      DateTime?
+  promoCodeUsed      String?
+  familyOwnerId      String?
   createdAt          DateTime            @default(now())
   progress           UserProgress[]
   quizResults        QuizResult[]
   webinarEnrollments WebinarEnrollment[]
   demoAccount        DemoAccount?
+  familyOwner        User?               @relation("FamilyMembers", fields: [familyOwnerId], references: [id])
+  familyMembers      User[]              @relation("FamilyMembers")
 }
 
 model Course {
@@ -30,6 +36,7 @@ model Course {
   level       String
   coverImage  String
   isPublished Boolean  @default(false)
+  isPremium   Boolean  @default(false)
   createdAt   DateTime @default(now())
   lessons     Lesson[]
 }

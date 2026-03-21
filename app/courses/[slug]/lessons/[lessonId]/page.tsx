@@ -1,4 +1,5 @@
-import { Clock3, PlayCircle } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, ArrowRight, Clock3, PlayCircle } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import { redirect, notFound } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
@@ -9,6 +10,8 @@ import { QuizForm } from '@/components/forms/quiz-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LessonContent } from '@/components/courses/lesson-content';
 import { LessonCompletionBanner } from '@/components/courses/lesson-completion-banner';
+import { Button } from '@/components/ui/button';
+import { getViewerAccess } from '@/lib/access';
 
 export default async function LessonPage({ params }: { params: { slug: string; lessonId: string } }) {
   const session = await getServerSession(authOptions);
@@ -16,16 +19,24 @@ export default async function LessonPage({ params }: { params: { slug: string; l
 
   const lesson = await db.lesson.findUnique({
     where: { id: params.lessonId },
-    include: { course: true, quiz: { include: { questions: true } } }
+    include: { course: { include: { lessons: { orderBy: { order: 'asc' } } } }, quiz: { include: { questions: true } } }
   });
 
   if (!lesson) notFound();
+
+  const access = await getViewerAccess(session.user.id);
+  if (lesson.course.isPremium && !access?.accessActive) {
+    redirect('/pricing?plan=learning');
+  }
 
   const progress = await db.userProgress.findUnique({
     where: { userId_lessonId: { userId: session.user.id, lessonId: lesson.id } }
   });
 
   const isCompleted = Boolean(progress?.completed);
+  const currentIndex = lesson.course.lessons.findIndex((item) => item.id === lesson.id);
+  const previousLesson = currentIndex > 0 ? lesson.course.lessons[currentIndex - 1] : null;
+  const nextLesson = currentIndex >= 0 ? lesson.course.lessons[currentIndex + 1] ?? null : null;
 
   return (
     <Container className="py-10 sm:py-12">
@@ -66,6 +77,18 @@ export default async function LessonPage({ params }: { params: { slug: string; l
           <article className="rounded-2xl border border-border/80 bg-card px-6 py-8 sm:px-10 sm:py-10">
             <div className="mx-auto max-w-3xl">
               <LessonContent content={lesson.content} />
+            </div>
+            <div className="mt-8 flex flex-wrap justify-between gap-3 border-t border-border/70 pt-6">
+              {previousLesson ? (
+                <Button variant="secondary" asChild>
+                  <Link href={`/courses/${lesson.course.slug}/lessons/${previousLesson.id}`}><ArrowLeft className="mr-2 h-4 w-4" /> Предыдущий урок</Link>
+                </Button>
+              ) : <span />}
+              {nextLesson ? (
+                <Button asChild>
+                  <Link href={`/courses/${lesson.course.slug}/lessons/${nextLesson.id}`}>Следующий урок <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+              ) : null}
             </div>
           </article>
         </div>
