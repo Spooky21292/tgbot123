@@ -8,6 +8,7 @@ import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { QuizForm } from '@/components/forms/quiz-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LessonContent } from '@/components/courses/lesson-content';
+import { LessonCompletionBanner } from '@/components/courses/lesson-completion-banner';
 
 export default async function LessonPage({ params }: { params: { slug: string; lessonId: string } }) {
   const session = await getServerSession(authOptions);
@@ -20,6 +21,12 @@ export default async function LessonPage({ params }: { params: { slug: string; l
 
   if (!lesson) notFound();
 
+  const progress = await db.userProgress.findUnique({
+    where: { userId_lessonId: { userId: session.user.id, lessonId: lesson.id } }
+  });
+
+  const isCompleted = Boolean(progress?.completed);
+
   return (
     <Container className="py-10 sm:py-12">
       <Breadcrumbs
@@ -30,6 +37,8 @@ export default async function LessonPage({ params }: { params: { slug: string; l
           { label: lesson.title }
         ]}
       />
+
+      <LessonCompletionBanner initialCompleted={isCompleted} />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-6">
@@ -43,6 +52,7 @@ export default async function LessonPage({ params }: { params: { slug: string; l
                 <Clock3 className="h-4 w-4" />
                 {lesson.durationMinutes} минут
               </span>
+              {isCompleted ? <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-900 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-100">Пройдено</span> : null}
             </div>
             <h1 className="mt-5 max-w-4xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
               {lesson.title}
@@ -73,7 +83,7 @@ export default async function LessonPage({ params }: { params: { slug: string; l
           </Card>
 
           {lesson.quiz ? (
-            <QuizForm quiz={lesson.quiz} lessonId={lesson.id} />
+            <QuizForm quiz={lesson.quiz} lessonId={lesson.id} initialCompleted={isCompleted} />
           ) : (
             <div className="rounded-2xl border border-border/80 bg-card p-6 text-sm text-muted-foreground">
               Тест для этого урока пока не добавлен.

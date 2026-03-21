@@ -13,7 +13,6 @@ export function Footer() {
           <Link href="/courses" className="transition-colors hover:text-foreground">Курсы</Link>
           <Link href="/blog" className="transition-colors hover:text-foreground">Блог</Link>
           <Link href="/webinars" className="transition-colors hover:text-foreground">Вебинары</Link>
-          <Link href="/contact" className="transition-colors hover:text-foreground">Контакты</Link>
         </div>
       </Container>
     </footer>

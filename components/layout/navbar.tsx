@@ -10,8 +10,7 @@ import { ThemeToggle } from './theme-toggle';
 const links = [
   ['Курсы', '/courses'],
   ['Блог', '/blog'],
-  ['Вебинары', '/webinars'],
-  ['Контакты', '/contact']
+  ['Вебинары', '/webinars']
 ];
 
 export function Navbar() {
@@ -25,6 +24,12 @@ export function Navbar() {
             <GraduationCap className="h-4.5 w-4.5" />
           </span>
           <span>FinSkills Pro</span>
+          <span className="loading-wave" aria-hidden="true">
+            <span className="loading-bar" />
+            <span className="loading-bar" />
+            <span className="loading-bar" />
+            <span className="loading-bar" />
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">

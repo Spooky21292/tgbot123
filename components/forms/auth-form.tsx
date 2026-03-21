@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 type Mode = 'login' | 'register';
 type FormValues = LoginInput | RegisterInput;
@@ -30,6 +31,15 @@ async function parseJsonSafely(response: Response) {
   }
 }
 
+function FloatingField({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="auth-field">{children}<label className="auth-label">{label}</label></div>
+      <p className="mt-1 text-xs text-red-300">{error}</p>
+    </div>
+  );
+}
+
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -39,6 +49,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     register,
     control,
     handleSubmit,
+    watch,
     formState: { errors },
     reset
   } = useForm<FormValues>({
@@ -50,6 +61,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
         ? { email: '', password: '' }
         : { name: '', email: '', password: '', ageGroup: '18-25' }
   });
+
+  const ageGroupValue = watch('ageGroup' as const);
 
   const onSubmit = handleSubmit((values) => {
     startTransition(async () => {
@@ -89,54 +102,57 @@ export function AuthForm({ mode }: { mode: Mode }) {
   });
 
   return (
-    <Card className="mx-auto w-full max-w-md">
+    <Card className="auth-shell mx-auto w-full max-w-md border-white/10 text-white shadow-[0_24px_80px_rgba(15,23,42,0.45)]">
       <CardHeader>
-        <CardTitle>{mode === 'login' ? 'Вход в FinSkills Pro' : 'Создать аккаунт'}</CardTitle>
+        <p className="auth-note text-sm">{mode === 'login' ? 'Возвращение в кабинет' : 'Новый доступ к платформе'}</p>
+        <CardTitle className="text-2xl text-white">{mode === 'login' ? 'Вход в FinSkills Pro' : 'Создать аккаунт'}</CardTitle>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={onSubmit} noValidate>
           {mode === 'register' && (
-            <div>
-              <Input placeholder="Имя" autoComplete="name" {...register('name' as const)} />
-              <p className="mt-1 text-xs text-red-500">{errors.name?.message as string}</p>
-            </div>
+            <FloatingField label="Имя" error={errors.name?.message as string}>
+              <Input placeholder=" " autoComplete="name" className="auth-input h-14 border-0 bg-transparent px-4 text-white" {...register('name' as const)} />
+            </FloatingField>
           )}
 
-          <div>
-            <Input placeholder="Email" type="email" autoComplete="email" {...register('email')} />
-            <p className="mt-1 text-xs text-red-500">{errors.email?.message as string}</p>
-          </div>
+          <FloatingField label="Email" error={errors.email?.message as string}>
+            <Input placeholder=" " type="email" autoComplete="email" className="auth-input h-14 border-0 bg-transparent px-4 text-white" {...register('email')} />
+          </FloatingField>
 
-          <div>
+          <FloatingField label="Пароль" error={errors.password?.message as string}>
             <Input
               type="password"
-              placeholder="Пароль"
+              placeholder=" "
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              className="auth-input h-14 border-0 bg-transparent px-4 text-white"
               {...register('password')}
             />
-            <p className="mt-1 text-xs text-red-500">{errors.password?.message as string}</p>
-          </div>
+          </FloatingField>
 
           {mode === 'register' && (
             <div>
-              <Controller
-                control={control}
-                name={'ageGroup' as const}
-                render={({ field }) => (
-                  <Select
-                    value={field.value ?? '18-25'}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    name={field.name}
-                    ref={field.ref}
-                  >
-                    <option value="12-17">12–17</option>
-                    <option value="18-25">18–25</option>
-                    <option value="26+">26+</option>
-                  </Select>
-                )}
-              />
-              <p className="mt-1 text-xs text-red-500">{errors.ageGroup?.message as string}</p>
+              <div className="auth-field">
+                <Controller
+                  control={control}
+                  name={'ageGroup' as const}
+                  render={({ field }) => (
+                    <Select
+                      value={field.value ?? '18-25'}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                      className={cn('auth-select h-14 border-0 bg-transparent px-4 text-white', (ageGroupValue ?? '18-25') && 'has-value')}
+                    >
+                      <option value="12-17">12–17</option>
+                      <option value="18-25">18–25</option>
+                      <option value="26+">26+</option>
+                    </Select>
+                  )}
+                />
+                <label className="auth-label">Возрастная группа</label>
+              </div>
+              <p className="mt-1 text-xs text-red-300">{errors.ageGroup?.message as string}</p>
             </div>
           )}
 
