@@ -17,7 +17,7 @@ export function getQuizFeedback(score: number) {
 
 export function ageGroupLabel(ageGroup: string) {
   return {
-    "12-17": "12–17",
+    "14-17": "14–17",
     "18-25": "18–25",
     "26+": "26+"
   }[ageGroup] ?? ageGroup;

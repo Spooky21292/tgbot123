@@ -3,7 +3,7 @@ import { z } from 'zod';
 const requiredText = (message: string, min = 1) =>
   z.string({ required_error: message }).trim().min(min, message);
 
-const ageGroupSchema = z.enum(['12-17', '18-25', '26+'], {
+const ageGroupSchema = z.enum(['14-17', '18-25', '26+'], {
   required_error: 'Выберите возрастную группу'
 });
 

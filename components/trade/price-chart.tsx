@@ -54,23 +54,20 @@ export function PriceChart({
 }) {
   const [range, setRange] = useState<ChartRange>('1M');
   const [candles, setCandles] = useState(initialCandles);
+  const [monthlyCandles, setMonthlyCandles] = useState(initialCandles);
   const [quote, setQuote] = useState(initialQuote);
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
-  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
 
   useEffect(() => {
     setCandles(initialCandles);
+    setMonthlyCandles(initialCandles);
   }, [initialCandles]);
 
   useEffect(() => {
     setQuote(initialQuote);
   }, [initialQuote]);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const refreshCandles = useCallback(async () => {
     try {
@@ -90,8 +87,9 @@ export function PriceChart({
 
       const nextQuote = quoteResponse.ok && quotePayload?.data ? quotePayload.data as MarketQuote : null;
       if (nextQuote) setQuote(nextQuote);
-      setCandles(syncLastCandleWithQuote(candlesPayload.data, nextQuote ?? quote));
-      setUpdatedAt(nextQuote?.asOf ?? new Date().toISOString());
+      const syncedCandles = syncLastCandleWithQuote(candlesPayload.data, nextQuote ?? quote);
+      setCandles(syncedCandles);
+      if (range === '1M') setMonthlyCandles(syncedCandles);
       setStatus('idle');
     } catch {
       setStatus('error');
@@ -139,10 +137,9 @@ export function PriceChart({
   const candleSlot = plotWidth / visibleCandles.length;
   const candleWidth = Math.max(Math.min(candleSlot * 0.58, 18), 4);
   const latest = quote ?? { price: visibleCandles[visibleCandles.length - 1].close, change: 0, changePercent: 0 };
-  const rangeStart = visibleCandles[0]?.open ?? visibleCandles[0]?.close ?? latest.price;
-  const lastDelta = latest.price - rangeStart;
-  const lastDeltaPercent = rangeStart ? (lastDelta / rangeStart) * 100 : 0;
-  const periodLabel = range === '1D' ? 'за день' : range === '1W' ? 'за неделю' : 'за месяц';
+  const monthStart = monthlyCandles[0]?.open ?? monthlyCandles[0]?.close ?? latest.price;
+  const lastDelta = latest.price - monthStart;
+  const lastDeltaPercent = monthStart ? (lastDelta / monthStart) * 100 : 0;
 
   const yForPrice = (price: number) => paddingTop + ((max - price) / rangeValue) * plotHeight;
 
@@ -160,12 +157,10 @@ export function PriceChart({
           <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
             <p className="text-3xl font-semibold tracking-tight text-foreground">{formatPrice(latest.price, precision)} {currencySymbol}</p>
             <p className={cn('text-sm font-medium', lastDelta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-              {lastDelta >= 0 ? '+' : '-'}{formatPrice(Math.abs(lastDelta), precision)} {currencySymbol} ({lastDeltaPercent >= 0 ? '+' : ''}{lastDeltaPercent.toFixed(2)}%) {periodLabel}
+              {lastDelta >= 0 ? '+' : '-'}{formatPrice(Math.abs(lastDelta), precision)} {currencySymbol} ({lastDeltaPercent >= 0 ? '+' : ''}{lastDeltaPercent.toFixed(2)}%) за месяц
             </p>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Свечной график с автообновлением каждые 60 секунд {status === 'error' ? '• временно нет связи с источником данных' : mounted && updatedAt ? `• обновлено ${new Date(updatedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}` : ''}
-          </p>
+          {status === 'error' ? <p className="mt-1 text-xs text-muted-foreground">Данные графика временно недоступны</p> : null}
         </div>
 
         <div className="flex flex-col gap-2 self-start">

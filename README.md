@@ -1,6 +1,6 @@
 # FinSkills Pro
 
-FinSkills Pro — production-like MVP онлайн-школы по финансовой грамотности и экономике для пользователей 12–17, 18–25 и 26+. Проект построен на Next.js 14 App Router, TypeScript, Tailwind CSS, Prisma и NextAuth.
+FinSkills Pro — production-like MVP онлайн-школы по финансовой грамотности и экономике для пользователей 14–17, 18–25 и 26+. Проект построен на Next.js 14 App Router, TypeScript, Tailwind CSS, Prisma и NextAuth.
 
 ## Что внутри
 - Главная страница с позиционированием, преимуществами и CTA.

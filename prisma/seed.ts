@@ -25,8 +25,8 @@ const courseTemplates: CourseSeed[] = [
   {
     title: "Финансовая грамотность для подростков: деньги, безопасность и первые решения",
     slug: "finansovaya-gramotnost-dlya-podrostkov-dengi-i-bezopasnost",
-    description: "Премиальная программа для 12–17 лет: от понимания денег и бюджета до цифровой безопасности, мошенничества, первой подработки и безопасного знакомства с инвестициями.",
-    age: "12-17",
+    description: "Премиальная программа для 14–17 лет: от понимания денег и бюджета до цифровой безопасности, мошенничества, первой подработки и безопасного знакомства с инвестициями.",
+    age: "14-17",
     level: "beginner",
     cover: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80",
     lessons: [
@@ -232,7 +232,7 @@ async function main() {
 
   const [admin, teenUser, youngUser, adultUser] = await Promise.all([
     prisma.user.create({ data: { name: 'Анна Романова', email: 'admin@finskills.pro', passwordHash, ageGroup: '26+', role: 'admin' } }),
-    prisma.user.create({ data: { name: 'Алина Воронцова', email: 'teen@finskills.pro', passwordHash, ageGroup: '12-17' } }),
+    prisma.user.create({ data: { name: 'Алина Воронцова', email: 'teen@finskills.pro', passwordHash, ageGroup: '14-17' } }),
     prisma.user.create({ data: { name: 'Максим Беляев', email: 'young@finskills.pro', passwordHash, ageGroup: '18-25' } }),
     prisma.user.create({ data: { name: 'Елена Соколова', email: 'adult@finskills.pro', passwordHash, ageGroup: '26+' } })
   ]);
@@ -293,7 +293,7 @@ async function main() {
           videoUrl: item.videoUrl,
           content: item.content,
           order: index + 1,
-          durationMinutes: template.age === '12-17' ? 18 + index : 15 + index
+          durationMinutes: template.age === '14-17' ? 18 + index : 15 + index
         }
       });
 

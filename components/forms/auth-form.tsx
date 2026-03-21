@@ -59,7 +59,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     defaultValues:
       mode === 'login'
         ? { email: '', password: '' }
-        : { name: '', email: '', password: '', ageGroup: '18-25' }
+        : { name: '', email: '', password: '', ageGroup: '14-17' }
   });
 
   const ageGroupValue = watch('ageGroup' as const);
@@ -137,14 +137,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   name={'ageGroup' as const}
                   render={({ field }) => (
                     <Select
-                      value={field.value ?? '18-25'}
+                      value={field.value ?? '14-17'}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       name={field.name}
                       ref={field.ref}
-                      className={cn('auth-select h-14 border-0 bg-transparent px-4 text-white', (ageGroupValue ?? '18-25') && 'has-value')}
+                      className={cn('auth-select h-14 border-0 bg-transparent px-4 text-white', (ageGroupValue ?? '14-17') && 'has-value')}
                     >
-                      <option value="12-17">12–17</option>
+                      <option value="14-17">14–17</option>
                       <option value="18-25">18–25</option>
                       <option value="26+">26+</option>
                     </Select>

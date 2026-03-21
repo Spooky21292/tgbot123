@@ -15,7 +15,7 @@ export function HeroSection() {
     <section className="border-b border-border/70 bg-background py-20 sm:py-24">
       <Container>
         <div className="max-w-3xl">
-          <Badge>Финансовая грамотность для 12–17, 18–25 и 26+</Badge>
+          <Badge>Финансовая грамотность для 14–17, 18–25 и 26+</Badge>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl md:text-6xl">
             Спокойная и понятная платформа, чтобы навести порядок в деньгах и решениях.
           </h1>

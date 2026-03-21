@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
 import { getCurrencySymbol, type MarketQuote } from '@/lib/market-data';
 
 type Props = {
@@ -17,15 +16,11 @@ function formatPrice(symbol: string, price: number) {
 export function LiveAssetPrice({ symbol, initialQuote }: Props) {
   const [quote, setQuote] = useState(initialQuote);
   const [status, setStatus] = useState<'idle' | 'error'>('idle');
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setQuote(initialQuote);
   }, [initialQuote]);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const refreshQuote = useCallback(async () => {
     try {
@@ -57,14 +52,7 @@ export function LiveAssetPrice({ symbol, initialQuote }: Props) {
     <div className="rounded-2xl border border-border/80 bg-card px-5 py-4">
       <p className="text-sm text-muted-foreground">Текущая цена</p>
       <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">{formatPrice(symbol, quote.price)}</p>
-      <p className={cn('mt-1 text-sm', quote.changePercent >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-        {quote.changePercent >= 0 ? '+' : ''}{quote.changePercent.toFixed(2)}% за сессию
-      </p>
-      <p className="mt-2 text-xs text-muted-foreground">
-        {status === 'error'
-          ? 'Автообновление временно недоступно'
-          : mounted ? `Автообновление каждые 60 секунд • ${new Date(quote.asOf).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}` : 'Автообновление каждые 60 секунд'}
-      </p>
+      {status === 'error' ? <p className="mt-2 text-xs text-muted-foreground">Данные временно недоступны</p> : null}
     </div>
   );
 }
