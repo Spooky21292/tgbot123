@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   if (user?.familyOwnerId) {
     return NextResponse.json({ error: 'Сначала выйдите из семейного доступа, чтобы купить свой тариф' }, { status: 400 });
   }
-  if (!['learning', 'family'].includes(planId)) {
+  if (!['bot', 'learning', 'family'].includes(planId)) {
     return NextResponse.json({ error: 'Неизвестный тариф' }, { status: 400 });
   }
   if (promoCode !== 'TESTPROMO') {

@@ -1,7 +1,12 @@
 import Link from 'next/link';
 import { Container } from './container';
 
-const contacts = ['@Spooky9999', '@Lisa200708', '@LLirik_if', '@semen27778'];
+const contacts = [
+  { label: '@Spooky9999', href: 'https://t.me/Spooky9999' },
+  { label: '@Lisa200708', href: 'https://t.me/Lisa200708' },
+  { label: '@LLirik_if', href: 'https://t.me/LLirik_if' },
+  { label: '@semen27778', href: 'https://t.me/semen27778' }
+];
 
 export function Footer() {
   return (
@@ -16,10 +21,17 @@ export function Footer() {
           <Link href="/trade" className="transition-colors hover:text-foreground">Демо-трейд</Link>
           <Link href="/blog" className="transition-colors hover:text-foreground">Блог</Link>
           <Link href="/webinars" className="transition-colors hover:text-foreground">Вебинары</Link>
+          <Link href="/bot" className="transition-colors hover:text-foreground">Telegram Бот</Link>
         </div>
         <div className="space-y-2">
           <p className="font-medium text-foreground">Контакты</p>
-          <p>Telegram: {contacts.join(' · ')}</p>
+          <div className="flex flex-wrap gap-3">
+            {contacts.map((contact) => (
+              <a key={contact.href} href={contact.href} target="_blank" rel="noreferrer" className="transition-colors hover:text-foreground">
+                {contact.label}
+              </a>
+            ))}
+          </div>
         </div>
       </Container>
     </footer>

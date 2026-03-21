@@ -29,15 +29,16 @@ export async function getCourses(filters?: { ageGroup?: string; level?: string; 
     orderBy: { createdAt: 'desc' }
   });
 
-  if (!filters?.ageGroup && filters?.preferredAgeGroup) {
-    return courses.sort((a, b) => {
-      const aScore = a.ageGroup === filters.preferredAgeGroup ? 1 : 0;
-      const bScore = b.ageGroup === filters.preferredAgeGroup ? 1 : 0;
-      return bScore - aScore;
-    });
-  }
+  return courses.sort((a, b) => {
+    const premiumScore = Number(a.isPremium) - Number(b.isPremium);
+    if (premiumScore !== 0) return premiumScore;
 
-  return courses;
+    const aAgeScore = !filters?.ageGroup && filters?.preferredAgeGroup && a.ageGroup === filters.preferredAgeGroup ? 1 : 0;
+    const bAgeScore = !filters?.ageGroup && filters?.preferredAgeGroup && b.ageGroup === filters.preferredAgeGroup ? 1 : 0;
+    if (aAgeScore !== bAgeScore) return bAgeScore - aAgeScore;
+
+    return a.title.localeCompare(b.title, 'ru');
+  });
 }
 
 export async function getBlogPosts(filters?: { search?: string; category?: string }) {

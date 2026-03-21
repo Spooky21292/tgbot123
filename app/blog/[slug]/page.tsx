@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { Container } from '@/components/layout/container';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { isFreeBlogSlug } from '@/lib/content-access';
+import { getViewerAccess } from '@/lib/access';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const article = await db.article.findUnique({ where: { slug: params.slug } });
@@ -14,7 +15,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user && !isFreeBlogSlug(params.slug)) redirect('/auth/register');
+  const isFree = isFreeBlogSlug(params.slug);
+  const access = session?.user ? await getViewerAccess(session.user.id) : null;
+  if (!isFree && !session?.user) redirect('/auth/register');
+  if (!isFree && session?.user && !access?.accessActive) redirect('/pricing?plan=learning');
 
   const article = await db.article.findUnique({ where: { slug: params.slug } });
   if (!article) notFound();

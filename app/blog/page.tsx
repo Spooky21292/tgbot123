@@ -10,18 +10,20 @@ import { Input } from '@/components/ui/input';
 import { authOptions } from '@/lib/auth';
 import { Badge } from '@/components/ui/badge';
 import { isFreeBlogSlug } from '@/lib/content-access';
+import { getViewerAccess } from '@/lib/access';
 
 export const metadata: Metadata = { title: 'Блог', description: 'Статьи о бюджете, инфляции, налогах и привычках' };
 
 const blogTopics = ['бюджет', 'налоги', 'семейные финансы', 'сбережения', 'инфляция', 'безопасность', 'инвестиции', 'финансовые привычки', 'карьера'];
 
 export default async function BlogPage({ searchParams }: { searchParams?: { search?: string; topic?: string } }) {
+  const session = await getServerSession(authOptions);
   const query = [searchParams?.search, searchParams?.topic].filter(Boolean).join(' ').trim();
-  const [posts, session] = await Promise.all([
+  const [posts, access] = await Promise.all([
     getBlogPosts({ search: query || undefined }),
-    getServerSession(authOptions)
+    session?.user ? getViewerAccess(session.user.id) : Promise.resolve(null)
   ]);
-  const articleHref = (slug: string) => session?.user || isFreeBlogSlug(slug) ? `/blog/${slug}` : '/auth/register';
+  const accessActive = Boolean(access?.accessActive);
 
   return (
     <Container className="py-10 sm:py-12">
@@ -46,24 +48,34 @@ export default async function BlogPage({ searchParams }: { searchParams?: { sear
       </div>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
-        {posts.length ? posts.map((post) => (
-          <Card key={post.id} className="flex h-full flex-col">
-            <CardHeader className="flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="w-fit">{post.category}</Badge>
-                {isFreeBlogSlug(post.slug) ? <Badge variant="outline">Бесплатно</Badge> : null}
-              </div>
-              <CardTitle className="mt-3">{post.title}</CardTitle>
-              <CardDescription>{post.excerpt}</CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto flex flex-col">
-              <p className="mb-4 text-sm text-muted-foreground">Развёрнутый материал с примерами, структурой и практическими выводами.</p>
-              <Button className="self-start" asChild>
-                <Link href={articleHref(post.slug)}>Читать</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )) : <Card className="lg:col-span-3"><CardContent className="pt-6 text-muted-foreground">По вашему запросу статьи не найдены.</CardContent></Card>}
+        {posts.length ? posts.map((post) => {
+          const isFree = isFreeBlogSlug(post.slug);
+          const canOpen = isFree || accessActive;
+          return (
+            <Card key={post.id} className="flex h-full flex-col">
+              <CardHeader className="flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className="w-fit">{post.category}</Badge>
+                  {isFree ? <Badge variant="outline">Бесплатно</Badge> : <Badge variant="secondary">🔒 По тарифу</Badge>}
+                </div>
+                <CardTitle className="mt-3">{post.title}</CardTitle>
+                <CardDescription>{post.excerpt}</CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto flex flex-col">
+                <p className="mb-4 text-sm text-muted-foreground">Развёрнутый материал с примерами, структурой и практическими выводами.</p>
+                {canOpen ? (
+                  <Button className="self-start" asChild>
+                    <Link href={`/blog/${post.slug}`}>Читать</Link>
+                  </Button>
+                ) : (
+                  <Button className="self-start" variant="secondary" asChild>
+                    <Link href="/pricing?plan=learning">🔒 Открыть по тарифу</Link>
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          );
+        }) : <Card className="lg:col-span-3"><CardContent className="pt-6 text-muted-foreground">По вашему запросу статьи не найдены.</CardContent></Card>}
       </div>
     </Container>
   );

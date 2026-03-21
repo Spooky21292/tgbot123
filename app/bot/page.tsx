@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { db } from '@/lib/db';
 
-export const metadata: Metadata = { title: 'Telegram-бот', description: 'Образовательный Telegram-ассистент FinSkills Pro' };
+export const metadata: Metadata = { title: 'Telegram-бот', description: 'Telegram-ассистент FinSkills Pro' };
 
 const icons = { Bell, MessageCircleQuestion, BarChart3, Sparkles } as const;
 
@@ -16,12 +16,12 @@ export default async function BotPage() {
     <Container className="py-10 sm:py-12">
       <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr]">
         <div>
-          <h1 className="text-4xl font-semibold tracking-tight text-foreground">Telegram-ассистент для спокойного учебного ритма</h1>
+          <h1 className="text-4xl font-semibold tracking-tight text-foreground">Telegram-бот с ежедневными идеями по акциям и облигациям</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-            Бот напоминает о незавершённых уроках, помогает закреплять ключевые идеи и поддерживает регулярность без давления и лишнего шума.
+            Бот ежедневно собирает открытую информацию из интернета, выделяет одну идею по акции или облигации и показывает её как вероятностный сценарий для изучения. Это не гарантия результата, не персональная инвестиционная рекомендация и не обещание прибыли.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button>Подключить бота</Button>
+            <Button asChild><a href="/pricing?plan=bot">Подключить бота</a></Button>
             <Button variant="secondary">Посмотреть сценарии</Button>
           </div>
           <div className="mt-8 grid gap-4">
@@ -44,16 +44,16 @@ export default async function BotPage() {
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>Пример сценария</CardTitle>
+            <CardTitle>Как это работает</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
-            <div className="rounded-xl border border-border/80 bg-muted/30 p-4">👋 У вас открыт следующий урок: «Бюджет месяца». На прохождение нужно около 16 минут.</div>
-            <div className="rounded-xl border border-border/80 bg-background p-4">📌 Сегодняшний фокус: сначала проверьте обязательные расходы, потом распределите деньги по целям и резерву.</div>
-            <div className="rounded-xl border border-border/80 bg-muted/30 p-4">📊 Короткая образовательная сводка: резерв и регулярный пересмотр бюджета важнее, чем хаотичные решения.</div>
-            <div className="rounded-xl border border-border/80 bg-background p-4">🛡️ Бот никогда не просит коды, пароли или данные карты и не даёт торговых команд.</div>
+            <div className="rounded-xl border border-border/80 bg-muted/30 p-4">📡 Каждый день бот просматривает публичные новости, обзоры и данные рынка, чтобы выбрать одну идею для самостоятельного изучения.</div>
+            <div className="rounded-xl border border-border/80 bg-background p-4">📌 В сообщении приходит инструмент, краткая логика сценария, риск-факторы и напоминание, что решение всегда остаётся за пользователем.</div>
+            <div className="rounded-xl border border-border/80 bg-muted/30 p-4">📊 Вместо обещаний бот показывает вероятностную идею с акцентом на обучение, а не на слепое повторение.</div>
+            <div className="rounded-xl border border-border/80 bg-background p-4">🛡️ Даже при высокой исторической точности сигнал не является гарантированным и может не сработать на реальном рынке.</div>
             <div className="flex items-start gap-3 rounded-xl border border-border/80 bg-slate-950 px-4 py-3 text-sm text-slate-100 dark:bg-slate-100 dark:text-slate-950">
               <ShieldCheck className="mt-0.5 h-4 w-4" />
-              Только образовательный сценарий и поддержка темпа обучения.
+              Используйте идеи бота только как образовательный ориентир и повод перепроверить сценарий самостоятельно.
             </div>
           </CardContent>
         </Card>

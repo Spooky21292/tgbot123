@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 export function hasActiveAccess(user: { activePlan?: string | null; planExpiresAt?: Date | string | null; familyOwnerId?: string | null } | null | undefined) {
   if (!user) return false;
   const expiresAt = user.planExpiresAt ? new Date(user.planExpiresAt) : null;
-  const directAccess = Boolean(user.activePlan) && Boolean(expiresAt && expiresAt.getTime() > Date.now());
+  const directAccess = ['learning', 'family'].includes(user.activePlan ?? '') && Boolean(expiresAt && expiresAt.getTime() > Date.now());
   return directAccess || Boolean(user.familyOwnerId);
 }
 

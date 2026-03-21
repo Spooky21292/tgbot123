@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: 'Тарифы', description: 'Тар�
 
 const plans = [
   { id: 'start', name: 'Starter', price: '0 ₽', period: '/мес', description: 'Подходит для спокойного знакомства с платформой.', features: ['Открытые статьи и вводные материалы', 'Знакомство с интерфейсом', 'Базовые сценарии Telegram-ассистента'] },
+  { id: 'bot', name: 'Telegram Bot', price: '200 ₽', period: '/мес', description: 'Ежедневные вероятностные идеи по акциям и облигациям на основе открытой интернет-информации.', promo: 'Промокод: TESTPROMO', features: ['1 идея в день по акции или облигации', 'Краткое объяснение сценария и риска', 'Источники из открытой информации', 'Без гарантии результата и без персональных обещаний'] },
   { id: 'learning', name: 'Learning', price: '499 ₽', period: '/мес', description: 'Полный доступ к обучению и библиотеке записей.', promo: 'Промокод: TESTPROMO', features: ['Все курсы и уроки', 'Тесты, прогресс и рекомендации', 'Все вебинары и доступ к записям'] },
   { id: 'family', name: 'Family', price: '999 ₽', period: '/мес', description: 'Для семьи с единым доступом к материалам.', promo: 'Промокод: TESTPROMO', features: ['До 3 пользователей в семье', 'Семейные сценарии и рекомендации', 'Архив вебинаров и семейный доступ к записям'] }
 ];
@@ -27,7 +28,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { p
           Выберите тариф и перейдите к оплате. После активации доступ появится в кабинете автоматически.
         </p>
       </div>
-      <div className="mt-8 grid gap-5 lg:grid-cols-3">
+      <div className="mt-8 grid gap-5 lg:grid-cols-4">
         {plans.map((plan) => (
           <Card key={plan.id} id={plan.id} className="flex flex-col rounded-[28px] bg-white/90 dark:bg-card">
             <CardHeader className="px-6 py-8 sm:p-10 sm:pb-6">

@@ -13,7 +13,8 @@ export function Navbar() {
     ['Курсы', '/courses'],
     ['Демо-трейд', session?.user ? '/trade' : '/auth/register'],
     ['Блог', '/blog'],
-    ['Вебинары', '/webinars']
+    ['Вебинары', '/webinars'],
+    ['Telegram Бот', '/bot']
   ] as const;
 
   return (

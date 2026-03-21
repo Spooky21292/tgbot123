@@ -30,7 +30,7 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
         <div className="max-w-2xl">
           <h1 className="text-4xl font-semibold tracking-tight text-foreground">Каталог курсов</h1>
           <p className="mt-3 text-base leading-7 text-muted-foreground">
-            Большие структурированные программы по бюджету, безопасности, карьерным деньгам, семейным финансам и долгосрочным решениям.
+            Сначала показываем бесплатные программы, а дальше — курсы, которые ближе к вашему возрастному маршруту обучения.
           </p>
         </div>
         <form className="grid w-full gap-3 rounded-2xl border border-border/80 bg-card p-4 sm:grid-cols-[minmax(240px,1.5fr)_minmax(170px,1fr)_minmax(170px,1fr)_minmax(150px,auto)] lg:max-w-4xl">
@@ -57,7 +57,10 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
             <Card key={course.id} className="flex h-full flex-col">
               <CardHeader className="flex-1">
                 <div className="flex items-center justify-between gap-3">
-                  <Badge>{ageGroupLabel(course.ageGroup)}</Badge>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge>{ageGroupLabel(course.ageGroup)}</Badge>
+                    {!course.isPremium ? <Badge variant="outline">Бесплатно</Badge> : null}
+                  </div>
                   <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{courseLevelLabel(course.level)}</span>
                 </div>
                 <CardTitle className="mt-3 text-xl">{course.title}</CardTitle>
