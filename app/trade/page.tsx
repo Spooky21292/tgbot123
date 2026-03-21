@@ -10,12 +10,65 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResetDemoAccountButton } from '@/components/trade/reset-demo-account-button';
 
-export default async function TradePage({ searchParams }: { searchParams?: { search?: string } }) {
+type TradePageSearchParams = {
+  search?: string;
+  type?: string;
+  page?: string;
+};
+
+function buildTradeQuery(searchParams: TradePageSearchParams | undefined, overrides: Partial<TradePageSearchParams> = {}) {
+  const params = new URLSearchParams();
+  const nextSearch = overrides.search ?? searchParams?.search;
+  const nextType = overrides.type ?? searchParams?.type;
+  const nextPage = overrides.page ?? searchParams?.page;
+
+  if (nextSearch) params.set('search', nextSearch);
+  if (nextType && nextType !== 'all') params.set('type', nextType);
+  if (nextPage && nextPage !== '1') params.set('page', nextPage);
+
+  const query = params.toString();
+  return query ? `/trade?${query}` : '/trade';
+}
+
+function WatchlistPagination({
+  page,
+  pageCount,
+  searchParams,
+  assetType
+}: {
+  page: number;
+  pageCount: number;
+  searchParams?: TradePageSearchParams;
+  assetType: string;
+}) {
+  return (
+    <div className="mt-4 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+      <span>Страница {page} из {pageCount}</span>
+      <div className="flex items-center gap-2">
+        <Link
+          href={buildTradeQuery(searchParams, { type: assetType, page: String(Math.max(1, page - 1)) })}
+          className={`rounded-lg border px-3 py-2 ${page <= 1 ? 'pointer-events-none opacity-50' : ''}`}
+        >
+          Назад
+        </Link>
+        <Link
+          href={buildTradeQuery(searchParams, { type: assetType, page: String(Math.min(pageCount, page + 1)) })}
+          className={`rounded-lg border px-3 py-2 ${page >= pageCount ? 'pointer-events-none opacity-50' : ''}`}
+        >
+          Вперёд
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default async function TradePage({ searchParams }: { searchParams?: TradePageSearchParams }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect('/auth/login');
 
   try {
-    const data = await getTradingDashboard(session.user.id, searchParams?.search);
+    const currentPage = Number(searchParams?.page ?? '1');
+    const data = await getTradingDashboard(session.user.id, searchParams?.search, searchParams?.type, currentPage);
 
     return (
       <Container className="py-10 sm:py-12">
@@ -90,16 +143,35 @@ export default async function TradePage({ searchParams }: { searchParams?: { sea
               <CardDescription>Небольшой набор активов для спокойной учебной практики.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form className="mb-4">
+              <form className="mb-4 space-y-4">
                 <input
                   name="search"
                   defaultValue={searchParams?.search}
                   placeholder="Поиск по активам"
                   className="flex h-11 w-full rounded-xl border border-input bg-background px-3.5 py-2 text-sm text-foreground outline-none"
                 />
+                {data.watchlistPagination.assetType !== 'all' ? <input type="hidden" name="type" value={data.watchlistPagination.assetType} /> : null}
+                <input type="hidden" name="page" value="1" />
               </form>
+
+              <div className="mb-4 flex flex-wrap gap-2">
+                {[
+                  ['all', 'Все'],
+                  ['stock', 'Акции'],
+                  ['bond', 'Облигации']
+                ].map(([type, label]) => (
+                  <Link
+                    key={type}
+                    href={buildTradeQuery(searchParams, { type, page: '1' })}
+                    className={`rounded-lg border px-3 py-2 text-sm transition-colors ${data.watchlistPagination.assetType === type ? 'border-primary bg-primary/10 text-foreground' : 'border-border/70 text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+
               <div className="space-y-3">
-                {data.watchlist.map(({ asset, quote }) => (
+                {data.watchlist.length ? data.watchlist.map(({ asset, quote }) => (
                   <Link key={asset.id} href={`/trade/${encodeURIComponent(asset.symbol)}`} className="flex items-center justify-between rounded-xl border border-border/80 px-4 py-3 transition-colors hover:bg-muted/30">
                     <div>
                       <p className="font-medium text-foreground">{asset.symbol}</p>
@@ -112,8 +184,15 @@ export default async function TradePage({ searchParams }: { searchParams?: { sea
                       </p>
                     </div>
                   </Link>
-                ))}
+                )) : <p className="text-sm leading-6 text-muted-foreground">По вашему фильтру активы не найдены.</p>}
               </div>
+
+              <WatchlistPagination
+                page={data.watchlistPagination.page}
+                pageCount={data.watchlistPagination.pageCount}
+                searchParams={searchParams}
+                assetType={data.watchlistPagination.assetType}
+              />
             </CardContent>
           </Card>
         </div>

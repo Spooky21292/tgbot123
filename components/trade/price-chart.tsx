@@ -91,7 +91,7 @@ export function PriceChart({
       const nextQuote = quoteResponse.ok && quotePayload?.data ? quotePayload.data as MarketQuote : null;
       if (nextQuote) setQuote(nextQuote);
       setCandles(syncLastCandleWithQuote(candlesPayload.data, nextQuote ?? quote));
-      setUpdatedAt(new Date().toISOString());
+      setUpdatedAt(nextQuote?.asOf ?? new Date().toISOString());
       setStatus('idle');
     } catch {
       setStatus('error');
@@ -138,10 +138,9 @@ export function PriceChart({
   const plotWidth = width - paddingX * 2;
   const candleSlot = plotWidth / visibleCandles.length;
   const candleWidth = Math.max(Math.min(candleSlot * 0.58, 18), 4);
-  const latest = quote ?? { price: visibleCandles[visibleCandles.length - 1].close, changePercent: 0 };
-  const previous = visibleCandles[Math.max(visibleCandles.length - 2, 0)] ?? visibleCandles[visibleCandles.length - 1];
-  const lastDelta = latest.price - previous.close;
-  const lastDeltaPercent = previous.close ? (lastDelta / previous.close) * 100 : 0;
+  const latest = quote ?? { price: visibleCandles[visibleCandles.length - 1].close, change: 0, changePercent: 0 };
+  const lastDelta = typeof latest.change === 'number' ? latest.change : 0;
+  const lastDeltaPercent = typeof latest.changePercent === 'number' ? latest.changePercent : 0;
 
   const yForPrice = (price: number) => paddingTop + ((max - price) / rangeValue) * plotHeight;
 
@@ -163,7 +162,7 @@ export function PriceChart({
             </p>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Свечной график с автообновлением каждые 60 секунд {status === 'error' ? '• временно нет связи с источником данных' : mounted && updatedAt ? `• обновлено ${new Date(updatedAt).toLocaleTimeString('ru-RU')}` : ''}
+            Свечной график с автообновлением каждые 60 секунд {status === 'error' ? '• временно нет связи с источником данных' : mounted && updatedAt ? `• обновлено ${new Date(updatedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}` : ''}
           </p>
         </div>
 

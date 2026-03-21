@@ -63,7 +63,7 @@ export function LiveAssetPrice({ symbol, initialQuote }: Props) {
       <p className="mt-2 text-xs text-muted-foreground">
         {status === 'error'
           ? 'Автообновление временно недоступно'
-          : mounted ? `Автообновление каждые 60 секунд • ${new Date(quote.asOf).toLocaleTimeString('ru-RU')}` : 'Автообновление каждые 60 секунд'}
+          : mounted ? `Автообновление каждые 60 секунд • ${new Date(quote.asOf).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}` : 'Автообновление каждые 60 секунд'}
       </p>
     </div>
   );

@@ -86,9 +86,9 @@ export function OrderPanel({ symbol, price, availableBalance, ownedQuantity }: {
           <p className="mt-2 text-sm text-muted-foreground">Оценка сделки: {estimatedTotal.toFixed(2)} {currencySymbol}</p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Button disabled={pending} onClick={() => submit('BUY')}>Купить демо</Button>
-          <Button variant="secondary" disabled={pending} onClick={() => submit('SELL')}>Продать демо</Button>
+        <div className="grid gap-3 md:grid-cols-2">
+          <Button className="h-14 text-base" disabled={pending} onClick={() => submit('BUY')}>Купить демо</Button>
+          <Button className="h-14 text-base" variant="secondary" disabled={pending} onClick={() => submit('SELL')}>Продать демо</Button>
         </div>
       </div>
     </div>
