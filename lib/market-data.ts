@@ -122,9 +122,10 @@ function basePriceForSymbol(symbol: string) {
 
 function demoQuote(symbol: string): MarketQuote {
   const seed = hashSymbol(symbol);
+  const minuteBucket = Math.floor(Date.now() / 60_000);
   const base = basePriceForSymbol(symbol);
   const meta = getRussianAssetMeta(symbol);
-  const wave = Math.sin(seed) * (meta?.type === 'bond' ? base * 0.003 : base * 0.018);
+  const wave = Math.sin(seed + minuteBucket / 6) * (meta?.type === 'bond' ? base * 0.003 : base * 0.018);
   const precision = pricePrecision(symbol);
   const price = Number((base + wave).toFixed(precision));
   const prev = base;
@@ -144,6 +145,7 @@ function demoCandles(symbol: string, points = 30, interval: MarketInterval = '1d
     '1h': 60 * 60 * 1000,
     '1day': 24 * 60 * 60 * 1000
   };
+  const timeDrift = Math.floor(Date.now() / intervalMs[interval]);
   const amplitude = interval === '1min'
     ? (meta?.type === 'bond' ? base * 0.0012 : base * 0.0025)
     : interval === '15min'
@@ -155,7 +157,7 @@ function demoCandles(symbol: string, points = 30, interval: MarketInterval = '1d
   return Array.from({ length: points }, (_, index) => {
     const step = points - index;
     const time = new Date(Date.now() - step * intervalMs[interval]).toISOString();
-    const drift = Math.sin((seed + index) / 2.4) * amplitude;
+    const drift = Math.sin((seed + timeDrift + index) / 2.4) * amplitude;
     const trend = (index - points / 2) * (amplitude / Math.max(points * 6, 1));
     const close = Number((base + drift + trend).toFixed(precision));
     const open = Number((close - Math.cos(seed + index / 1.7) * amplitude * 0.32).toFixed(precision));

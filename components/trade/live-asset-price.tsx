@@ -17,10 +17,15 @@ function formatPrice(symbol: string, price: number) {
 export function LiveAssetPrice({ symbol, initialQuote }: Props) {
   const [quote, setQuote] = useState(initialQuote);
   const [status, setStatus] = useState<'idle' | 'error'>('idle');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setQuote(initialQuote);
   }, [initialQuote]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const refreshQuote = useCallback(async () => {
     try {
@@ -39,6 +44,8 @@ export function LiveAssetPrice({ symbol, initialQuote }: Props) {
   }, [symbol]);
 
   useEffect(() => {
+    void refreshQuote();
+
     const intervalId = window.setInterval(() => {
       void refreshQuote();
     }, 60_000);
@@ -56,7 +63,7 @@ export function LiveAssetPrice({ symbol, initialQuote }: Props) {
       <p className="mt-2 text-xs text-muted-foreground">
         {status === 'error'
           ? 'Автообновление временно недоступно'
-          : `Автообновление каждые 60 секунд • ${new Date(quote.asOf).toLocaleTimeString('ru-RU')}`}
+          : mounted ? `Автообновление каждые 60 секунд • ${new Date(quote.asOf).toLocaleTimeString('ru-RU')}` : 'Автообновление каждые 60 секунд'}
       </p>
     </div>
   );

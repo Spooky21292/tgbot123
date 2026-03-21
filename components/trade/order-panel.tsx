@@ -33,6 +33,8 @@ export function OrderPanel({ symbol, price, availableBalance, ownedQuantity }: {
   }, [symbol]);
 
   useEffect(() => {
+    void refreshPrice();
+
     const intervalId = window.setInterval(() => {
       void refreshPrice();
     }, 60_000);

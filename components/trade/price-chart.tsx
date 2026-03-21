@@ -36,11 +36,16 @@ export function PriceChart({
   const [range, setRange] = useState<ChartRange>('1M');
   const [candles, setCandles] = useState(initialCandles);
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
-  const [updatedAt, setUpdatedAt] = useState(() => new Date().toISOString());
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setCandles(initialCandles);
   }, [initialCandles]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const refreshCandles = useCallback(async () => {
     try {
@@ -119,7 +124,7 @@ export function PriceChart({
             </p>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Свечной график с автообновлением каждые 60 секунд {status === 'error' ? '• временно нет связи с источником данных' : `• обновлено ${new Date(updatedAt).toLocaleTimeString('ru-RU')}`}
+            Свечной график с автообновлением каждые 60 секунд {status === 'error' ? '• временно нет связи с источником данных' : mounted && updatedAt ? `• обновлено ${new Date(updatedAt).toLocaleTimeString('ru-RU')}` : ''}
           </p>
         </div>
 
