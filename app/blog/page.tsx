@@ -9,15 +9,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { authOptions } from '@/lib/auth';
 import { Badge } from '@/components/ui/badge';
+import { isFreeBlogSlug } from '@/lib/content-access';
 
 export const metadata: Metadata = { title: 'Блог', description: 'Статьи о бюджете, инфляции, налогах и привычках' };
 
-export default async function BlogPage({ searchParams }: { searchParams?: { search?: string } }) {
+const blogTopics = ['бюджет', 'налоги', 'семейные финансы', 'сбережения', 'инфляция', 'безопасность', 'инвестиции', 'финансовые привычки', 'карьера'];
+
+export default async function BlogPage({ searchParams }: { searchParams?: { search?: string; topic?: string } }) {
+  const query = [searchParams?.search, searchParams?.topic].filter(Boolean).join(' ').trim();
   const [posts, session] = await Promise.all([
-    getBlogPosts({ search: searchParams?.search }),
+    getBlogPosts({ search: query || undefined }),
     getServerSession(authOptions)
   ]);
-  const articleHref = (slug: string) => session?.user ? `/blog/${slug}` : '/auth/register';
+  const articleHref = (slug: string) => session?.user || isFreeBlogSlug(slug) ? `/blog/${slug}` : '/auth/register';
 
   return (
     <Container className="py-10 sm:py-12">
@@ -33,11 +37,22 @@ export default async function BlogPage({ searchParams }: { searchParams?: { sear
         </form>
       </div>
 
+      <div className="mt-5 flex flex-wrap gap-2">
+        {blogTopics.map((topic) => (
+          <Button key={topic} variant={searchParams?.topic === topic ? 'secondary' : 'outline'} size="sm" asChild>
+            <Link href={`/blog?topic=${encodeURIComponent(topic)}`}>{topic}</Link>
+          </Button>
+        ))}
+      </div>
+
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {posts.length ? posts.map((post) => (
           <Card key={post.id} className="flex h-full flex-col">
             <CardHeader className="flex-1">
-              <Badge className="w-fit">{post.category}</Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="w-fit">{post.category}</Badge>
+                {isFreeBlogSlug(post.slug) ? <Badge variant="outline">Бесплатно</Badge> : null}
+              </div>
               <CardTitle className="mt-3">{post.title}</CardTitle>
               <CardDescription>{post.excerpt}</CardDescription>
             </CardHeader>

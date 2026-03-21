@@ -18,6 +18,9 @@ export async function POST(request: Request) {
   if (promoCode !== 'TESTPROMO') {
     return NextResponse.json({ error: 'Нужен тестовый код TESTPROMO' }, { status: 400 });
   }
+  if (user?.activePlan && user?.planExpiresAt && new Date(user.planExpiresAt).getTime() > Date.now()) {
+    return NextResponse.json({ error: 'У вас уже есть активный тариф. Дождитесь его завершения перед сменой плана.' }, { status: 400 });
+  }
 
   const expiresAt = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000);
   await db.user.update({

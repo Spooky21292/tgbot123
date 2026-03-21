@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { Container } from '@/components/layout/container';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
+import { isFreeBlogSlug } from '@/lib/content-access';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const article = await db.article.findUnique({ where: { slug: params.slug } });
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user) redirect('/auth/register');
+  if (!session?.user && !isFreeBlogSlug(params.slug)) redirect('/auth/register');
 
   const article = await db.article.findUnique({ where: { slug: params.slug } });
   if (!article) notFound();
