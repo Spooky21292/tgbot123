@@ -7,46 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum AgeGroup {
-  age_12_17
-  age_18_25
-  age_26_plus
-}
-
-enum Role {
-  user
-  admin
-}
-
-enum CourseLevel {
-  beginner
-  intermediate
-  advanced
-}
-
 model User {
-  id             String         @id @default(cuid())
-  name           String
-  email          String         @unique
-  passwordHash   String
-  ageGroup       AgeGroup
-  role           Role           @default(user)
-  createdAt      DateTime       @default(now())
-  progress       UserProgress[]
-  quizResults    QuizResult[]
+  id                 String              @id @default(cuid())
+  name               String
+  email              String              @unique
+  passwordHash       String
+  ageGroup           String
+  role               String              @default("user")
+  createdAt          DateTime            @default(now())
+  progress           UserProgress[]
+  quizResults        QuizResult[]
   webinarEnrollments WebinarEnrollment[]
 }
 
 model Course {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
-  slug        String      @unique
+  slug        String   @unique
   description String
-  ageGroup    AgeGroup
-  level       CourseLevel
+  ageGroup    String
+  level       String
   coverImage  String
-  isPublished Boolean     @default(false)
-  createdAt   DateTime    @default(now())
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
   lessons     Lesson[]
 }
 
@@ -77,15 +60,15 @@ model Quiz {
 }
 
 model QuizQuestion {
-  id            String @id @default(cuid())
-  quizId         String
-  question       String
-  optionA        String
-  optionB        String
-  optionC        String
-  optionD        String
-  correctAnswer  String
-  quiz           Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  id           String @id @default(cuid())
+  quizId        String
+  question      String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String
+  quiz          Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
 model UserProgress {
@@ -102,32 +85,32 @@ model UserProgress {
 
 model QuizResult {
   id        String   @id @default(cuid())
-  userId     String
-  quizId     String
-  score      Int
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quiz       Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId    String
+  quizId    String
+  score     Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
 model Webinar {
-  id          String             @id @default(cuid())
+  id          String              @id @default(cuid())
   title       String
   description String
   speaker     String
   date        DateTime
   meetingUrl  String
-  isPublished Boolean            @default(false)
+  isPublished Boolean             @default(false)
   enrollments WebinarEnrollment[]
 }
 
 model WebinarEnrollment {
-  id         String   @id @default(cuid())
-  userId      String
-  webinarId   String
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  webinar     Webinar  @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  userId    String
+  webinarId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  webinar   Webinar  @relation(fields: [webinarId], references: [id], onDelete: Cascade)
 
   @@unique([userId, webinarId])
 }

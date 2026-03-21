@@ -27,9 +27,9 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
           <Input name="search" placeholder="Поиск по курсам" defaultValue={searchParams?.search} />
           <Select name="ageGroup" defaultValue={searchParams?.ageGroup ?? ''}>
             <option value="">Все возрасты</option>
-            <option value="age_12_17">12–17</option>
-            <option value="age_18_25">18–25</option>
-            <option value="age_26_plus">26+</option>
+            <option value="12-17">12–17</option>
+            <option value="18-25">18–25</option>
+            <option value="26+">26+</option>
           </Select>
           <Select name="level" defaultValue={searchParams?.level ?? ''}>
             <option value="">Все уровни</option>

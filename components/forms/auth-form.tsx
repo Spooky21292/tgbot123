@@ -20,6 +20,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 type Mode = 'login' | 'register';
 type FormValues = LoginInput | RegisterInput;
 
+async function parseJsonSafely(response: Response) {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -38,28 +48,30 @@ export function AuthForm({ mode }: { mode: Mode }) {
     defaultValues:
       mode === 'login'
         ? { email: '', password: '' }
-        : { name: '', email: '', password: '', ageGroup: 'age_18_25' }
+        : { name: '', email: '', password: '', ageGroup: '18-25' }
   });
 
   const onSubmit = handleSubmit((values) => {
     startTransition(async () => {
       if (mode === 'register') {
+        const registerValues = values as RegisterInput;
         const response = await fetch('/api/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(values)
+          body: JSON.stringify(registerValues)
         });
-        const data = await response.json();
+        const data = await parseJsonSafely(response);
+
         if (!response.ok) {
-          return toast.error(typeof data.error === 'string' ? data.error : 'Ошибка регистрации');
+          return toast.error(typeof data?.error === 'string' ? data.error : 'Ошибка регистрации');
         }
+
         toast.success('Аккаунт создан');
-        const registeredValues = values as RegisterInput;
         reset({
           name: '',
-          email: registeredValues.email,
-          password: registeredValues.password,
-          ageGroup: registeredValues.ageGroup
+          email: registerValues.email,
+          password: registerValues.password,
+          ageGroup: registerValues.ageGroup
         } as FormValues);
       }
 
@@ -111,10 +123,16 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 control={control}
                 name={'ageGroup' as const}
                 render={({ field }) => (
-                  <Select value={field.value ?? 'age_18_25'} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref}>
-                    <option value="age_12_17">12–17</option>
-                    <option value="age_18_25">18–25</option>
-                    <option value="age_26_plus">26+</option>
+                  <Select
+                    value={field.value ?? '18-25'}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  >
+                    <option value="12-17">12–17</option>
+                    <option value="18-25">18–25</option>
+                    <option value="26+">26+</option>
                   </Select>
                 )}
               />
