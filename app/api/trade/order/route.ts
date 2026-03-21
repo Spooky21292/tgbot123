@@ -1,13 +1,16 @@
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { authOptions } from '@/lib/auth';
-import { executeDemoTrade } from '@/lib/demo-trading';
+import { executeDemoTrade, isDemoTradingReady } from '@/lib/demo-trading';
 
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!isDemoTradingReady()) {
+      return NextResponse.json({ ok: false, error: 'Демо-трейдинг ещё не инициализирован. Выполните prisma generate/db push/db seed.' }, { status: 503 });
     }
     const body = await request.json().catch(() => null);
     const symbol = String(body?.symbol ?? '');

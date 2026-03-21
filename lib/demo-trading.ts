@@ -1,26 +1,56 @@
 import { db } from '@/lib/db';
 import { getMarketQuote } from '@/lib/market-data';
 
+function getTradingModels() {
+  const prisma = db as unknown as {
+    demoAccount?: any;
+    asset?: any;
+    position?: any;
+    trade?: any;
+    $transaction: typeof db.$transaction;
+  };
+
+  if (!prisma.demoAccount || !prisma.asset || !prisma.position || !prisma.trade) {
+    return null;
+  }
+
+  return prisma;
+}
+
+export function isDemoTradingReady() {
+  return Boolean(getTradingModels());
+}
+
+function createTradingNotReadyError() {
+  return new Error('DEMO_TRADING_NOT_READY');
+}
+
 export function getDemoStartingBalance() {
   const raw = Number(process.env.DEMO_TRADING_START_BALANCE ?? '100000');
   return Number.isFinite(raw) && raw > 0 ? raw : 100000;
 }
 
 export async function ensureDemoAccount(userId: string) {
+  const prisma = getTradingModels();
+  if (!prisma) throw createTradingNotReadyError();
+
   const initialBalance = getDemoStartingBalance();
-  const existing = await db.demoAccount.findUnique({ where: { userId } });
+  const existing = await prisma.demoAccount.findUnique({ where: { userId } });
   if (existing) return existing;
-  return db.demoAccount.create({
+  return prisma.demoAccount.create({
     data: { userId, balance: initialBalance, initialBalance, currency: 'USD' }
   });
 }
 
 export async function getTradingDashboard(userId: string, search?: string) {
+  const prisma = getTradingModels();
+  if (!prisma) throw createTradingNotReadyError();
+
   const account = await ensureDemoAccount(userId);
   const [positions, trades, assetPairs] = await Promise.all([
-    db.position.findMany({ where: { accountId: account.id }, include: { asset: true }, orderBy: { updatedAt: 'desc' } }),
-    db.trade.findMany({ where: { accountId: account.id }, include: { asset: true }, orderBy: { createdAt: 'desc' }, take: 12 }),
-    db.asset.findMany({
+    prisma.position.findMany({ where: { accountId: account.id }, include: { asset: true }, orderBy: { updatedAt: 'desc' } }),
+    prisma.trade.findMany({ where: { accountId: account.id }, include: { asset: true }, orderBy: { createdAt: 'desc' }, take: 12 }),
+    prisma.asset.findMany({
       where: {
         isActive: true,
         ...(search ? { OR: [{ symbol: { contains: search } }, { name: { contains: search } }] } : {})
@@ -29,10 +59,10 @@ export async function getTradingDashboard(userId: string, search?: string) {
     })
   ]);
 
-  const uniqueSymbols = Array.from(new Set([...positions.map((position) => position.asset.symbol), ...assetPairs.map((asset) => asset.symbol)]));
+  const uniqueSymbols = Array.from(new Set([...positions.map((position: any) => position.asset.symbol), ...assetPairs.map((asset: any) => asset.symbol)]));
   const quotes = Object.fromEntries(await Promise.all(uniqueSymbols.map(async (symbol) => [symbol, await getMarketQuote(symbol)])));
 
-  const enrichedPositions = positions.map((position) => {
+  const enrichedPositions = positions.map((position: any) => {
     const quote = quotes[position.asset.symbol];
     const marketValue = position.quantity * quote.price;
     const costBasis = position.quantity * position.averagePrice;
@@ -47,7 +77,7 @@ export async function getTradingDashboard(userId: string, search?: string) {
   const totalPnl = equity - account.initialBalance;
   const totalReturn = account.initialBalance ? (totalPnl / account.initialBalance) * 100 : 0;
 
-  const watchlist = assetPairs.map((asset) => ({ asset, quote: quotes[asset.symbol] }));
+  const watchlist = assetPairs.map((asset: any) => ({ asset, quote: quotes[asset.symbol] }));
 
   return {
     account,
@@ -59,13 +89,16 @@ export async function getTradingDashboard(userId: string, search?: string) {
 }
 
 export async function getAssetTradingView(userId: string, symbol: string) {
+  const prisma = getTradingModels();
+  if (!prisma) throw createTradingNotReadyError();
+
   const account = await ensureDemoAccount(userId);
-  const asset = await db.asset.findUnique({ where: { symbol: symbol.toUpperCase() } });
+  const asset = await prisma.asset.findUnique({ where: { symbol: symbol.toUpperCase() } });
   if (!asset) return null;
   const [quote, position, trades] = await Promise.all([
     getMarketQuote(asset.symbol),
-    db.position.findUnique({ where: { accountId_assetId: { accountId: account.id, assetId: asset.id } } }),
-    db.trade.findMany({ where: { accountId: account.id, assetId: asset.id }, orderBy: { createdAt: 'desc' }, take: 10 })
+    prisma.position.findUnique({ where: { accountId_assetId: { accountId: account.id, assetId: asset.id } } }),
+    prisma.trade.findMany({ where: { accountId: account.id, assetId: asset.id }, orderBy: { createdAt: 'desc' }, take: 10 })
   ]);
   const marketValue = position ? position.quantity * quote.price : 0;
   const costBasis = position ? position.quantity * position.averagePrice : 0;
@@ -74,6 +107,9 @@ export async function getAssetTradingView(userId: string, symbol: string) {
 }
 
 export async function executeDemoTrade(input: { userId: string; symbol: string; side: string; quantity: number }) {
+  const prisma = getTradingModels();
+  if (!prisma) throw createTradingNotReadyError();
+
   const side = input.side.toUpperCase();
   if (!['BUY', 'SELL'].includes(side)) {
     return { ok: false as const, status: 400, error: 'Некорректная сторона сделки' };
@@ -83,14 +119,14 @@ export async function executeDemoTrade(input: { userId: string; symbol: string; 
   }
 
   const account = await ensureDemoAccount(input.userId);
-  const asset = await db.asset.findUnique({ where: { symbol: input.symbol.toUpperCase() } });
+  const asset = await prisma.asset.findUnique({ where: { symbol: input.symbol.toUpperCase() } });
   if (!asset) return { ok: false as const, status: 404, error: 'Актив не найден' };
 
   const quote = await getMarketQuote(asset.symbol);
   const price = quote.price;
   const total = Number((price * input.quantity).toFixed(2));
 
-  return db.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: any) => {
     const currentAccount = await tx.demoAccount.findUniqueOrThrow({ where: { id: account.id } });
     const currentPosition = await tx.position.findUnique({ where: { accountId_assetId: { accountId: account.id, assetId: asset.id } } });
 
@@ -131,12 +167,15 @@ export async function executeDemoTrade(input: { userId: string; symbol: string; 
 }
 
 export async function resetDemoAccount(userId: string) {
+  const prisma = getTradingModels();
+  if (!prisma) throw createTradingNotReadyError();
+
   const account = await ensureDemoAccount(userId);
   const initialBalance = getDemoStartingBalance();
-  await db.$transaction([
-    db.trade.deleteMany({ where: { accountId: account.id } }),
-    db.position.deleteMany({ where: { accountId: account.id } }),
-    db.demoAccount.update({ where: { id: account.id }, data: { balance: initialBalance, initialBalance } })
+  await prisma.$transaction([
+    prisma.trade.deleteMany({ where: { accountId: account.id } }),
+    prisma.position.deleteMany({ where: { accountId: account.id } }),
+    prisma.demoAccount.update({ where: { id: account.id }, data: { balance: initialBalance, initialBalance } })
   ]);
-  return db.demoAccount.findUniqueOrThrow({ where: { id: account.id } });
+  return prisma.demoAccount.findUniqueOrThrow({ where: { id: account.id } });
 }
