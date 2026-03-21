@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { RUSSIAN_ASSETS, type RussianAssetDefinition } from '@/lib/russian-assets';
 
 export type MarketQuote = {
   symbol: string;
@@ -19,76 +20,14 @@ export type MarketCandle = {
 
 export type MarketInterval = '1min' | '15min' | '1h' | '1day';
 
-export type RussianAssetMeta = {
-  symbol: string;
-  name: string;
-  type: 'stock' | 'bond';
-  board: 'TQBR' | 'TQOB';
-  market: 'shares' | 'bonds';
-  currency: 'RUB';
-  nominal?: number;
-  annualCouponPercent?: number;
-};
+export type RussianAssetMeta = RussianAssetDefinition;
 
 const provider = (process.env.MARKET_DATA_PROVIDER ?? 'moex').toLowerCase();
 const apiKey = process.env.MARKET_DATA_API_KEY ?? '';
 
-const RUSSIAN_ASSET_META: Record<string, RussianAssetMeta> = {
-  SBER: {
-    symbol: 'SBER',
-    name: 'Сбербанк ао',
-    type: 'stock',
-    board: 'TQBR',
-    market: 'shares',
-    currency: 'RUB'
-  },
-  GAZP: {
-    symbol: 'GAZP',
-    name: 'Газпром',
-    type: 'stock',
-    board: 'TQBR',
-    market: 'shares',
-    currency: 'RUB'
-  },
-  LKOH: {
-    symbol: 'LKOH',
-    name: 'ЛУКОЙЛ',
-    type: 'stock',
-    board: 'TQBR',
-    market: 'shares',
-    currency: 'RUB'
-  },
-  SU26238RMFS4: {
-    symbol: 'SU26238RMFS4',
-    name: 'ОФЗ 26238',
-    type: 'bond',
-    board: 'TQOB',
-    market: 'bonds',
-    currency: 'RUB',
-    nominal: 1000,
-    annualCouponPercent: 7.1
-  },
-  SU26243RMFS4: {
-    symbol: 'SU26243RMFS4',
-    name: 'ОФЗ 26243',
-    type: 'bond',
-    board: 'TQOB',
-    market: 'bonds',
-    currency: 'RUB',
-    nominal: 1000,
-    annualCouponPercent: 9.8
-  },
-  SU26248RMFS3: {
-    symbol: 'SU26248RMFS3',
-    name: 'ОФЗ 26248',
-    type: 'bond',
-    board: 'TQOB',
-    market: 'bonds',
-    currency: 'RUB',
-    nominal: 1000,
-    annualCouponPercent: 12.25
-  }
-};
+const RUSSIAN_ASSET_META: Record<string, RussianAssetMeta> = Object.fromEntries(
+  RUSSIAN_ASSETS.map((asset) => [asset.symbol, asset])
+);
 
 function hashSymbol(symbol: string) {
   return symbol.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
@@ -109,15 +48,8 @@ function pricePrecision(symbol: string) {
 }
 
 function basePriceForSymbol(symbol: string) {
-  const map: Record<string, number> = {
-    SBER: 318.4,
-    GAZP: 168.3,
-    LKOH: 7420.0,
-    SU26238RMFS4: 583.2,
-    SU26243RMFS4: 646.8,
-    SU26248RMFS3: 912.5
-  };
-  return map[symbol] ?? 100 + hashSymbol(symbol);
+  const meta = getRussianAssetMeta(symbol);
+  return meta?.basePrice ?? 100 + hashSymbol(symbol);
 }
 
 function demoQuote(symbol: string): MarketQuote {
@@ -191,7 +123,7 @@ async function fetchMoexJson(url: string) {
     headers: {
       Accept: 'application/json'
     },
-    next: { revalidate: 60 }
+    cache: 'no-store'
   });
   if (!response.ok) return null;
   return response.json();

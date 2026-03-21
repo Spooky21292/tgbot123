@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { getCurrencySymbol, type MarketCandle } from '@/lib/market-data';
+import { getCurrencySymbol, type MarketCandle, type MarketQuote } from '@/lib/market-data';
 
 type ChartRange = '1D' | '1W' | '1M';
 
@@ -12,7 +12,7 @@ type RangeConfig = {
 };
 
 const rangeConfig: Record<ChartRange, RangeConfig> = {
-  '1D': { interval: '1min', points: 120 },
+  '1D': { interval: '1min', points: 240 },
   '1W': { interval: '1h', points: 7 * 24 },
   '1M': { interval: '1day', points: 30 }
 };
@@ -24,24 +24,49 @@ function formatPrice(value: number, precision: number) {
   }).format(value);
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function syncLastCandleWithQuote(candles: MarketCandle[], quote: MarketQuote | null) {
+  if (!candles.length || !quote) return candles;
+  const next = [...candles];
+  const last = next[next.length - 1];
+  next[next.length - 1] = {
+    ...last,
+    close: quote.price,
+    high: Math.max(last.high, quote.price),
+    low: Math.min(last.low, quote.price)
+  };
+  return next;
+}
+
 export function PriceChart({
   symbol,
   candles: initialCandles,
+  initialQuote,
   className
 }: {
   symbol: string;
   candles: MarketCandle[];
+  initialQuote: MarketQuote;
   className?: string;
 }) {
   const [range, setRange] = useState<ChartRange>('1M');
   const [candles, setCandles] = useState(initialCandles);
+  const [quote, setQuote] = useState(initialQuote);
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   useEffect(() => {
     setCandles(initialCandles);
   }, [initialCandles]);
+
+  useEffect(() => {
+    setQuote(initialQuote);
+  }, [initialQuote]);
 
   useEffect(() => {
     setMounted(true);
@@ -51,21 +76,31 @@ export function PriceChart({
     try {
       const config = rangeConfig[range];
       setStatus((current) => (current === 'idle' ? 'loading' : current));
-      const response = await fetch(
-        `/api/trade/market/candles?symbol=${encodeURIComponent(symbol)}&interval=${config.interval}&points=${config.points}`,
-        { cache: 'no-store' }
-      );
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !Array.isArray(payload?.data)) {
+      const [candlesResponse, quoteResponse] = await Promise.all([
+        fetch(`/api/trade/market/candles?symbol=${encodeURIComponent(symbol)}&interval=${config.interval}&points=${config.points}`, { cache: 'no-store' }),
+        fetch(`/api/trade/market/quote?symbol=${encodeURIComponent(symbol)}`, { cache: 'no-store' })
+      ]);
+
+      const candlesPayload = await candlesResponse.json().catch(() => null);
+      const quotePayload = await quoteResponse.json().catch(() => null);
+
+      if (!candlesResponse.ok || !Array.isArray(candlesPayload?.data)) {
         throw new Error('CANDLES_REQUEST_FAILED');
       }
-      setCandles(payload.data);
+
+      const nextQuote = quoteResponse.ok && quotePayload?.data ? quotePayload.data as MarketQuote : null;
+      if (nextQuote) setQuote(nextQuote);
+      setCandles(syncLastCandleWithQuote(candlesPayload.data, nextQuote ?? quote));
       setUpdatedAt(new Date().toISOString());
       setStatus('idle');
     } catch {
       setStatus('error');
     }
-  }, [range, symbol]);
+  }, [quote, range, symbol]);
+
+  useEffect(() => {
+    setZoomLevel(1);
+  }, [range]);
 
   useEffect(() => {
     void refreshCandles();
@@ -77,7 +112,11 @@ export function PriceChart({
     return () => window.clearInterval(intervalId);
   }, [refreshCandles]);
 
-  const visibleCandles = useMemo(() => candles, [candles]);
+  const visibleCandles = useMemo(() => {
+    const basePoints = rangeConfig[range].points;
+    const count = clamp(Math.round(basePoints / zoomLevel), 20, candles.length || 20);
+    return candles.slice(-count);
+  }, [candles, range, zoomLevel]);
 
   if (!visibleCandles.length) {
     return <div className={cn('flex h-72 items-center justify-center rounded-2xl border border-border/80 bg-card text-sm text-muted-foreground', className)}>История цен временно недоступна.</div>;
@@ -99,9 +138,9 @@ export function PriceChart({
   const plotWidth = width - paddingX * 2;
   const candleSlot = plotWidth / visibleCandles.length;
   const candleWidth = Math.max(Math.min(candleSlot * 0.58, 18), 4);
-  const latest = visibleCandles[visibleCandles.length - 1];
-  const previous = visibleCandles[Math.max(visibleCandles.length - 2, 0)] ?? latest;
-  const lastDelta = latest.close - previous.close;
+  const latest = quote ?? { price: visibleCandles[visibleCandles.length - 1].close, changePercent: 0 };
+  const previous = visibleCandles[Math.max(visibleCandles.length - 2, 0)] ?? visibleCandles[visibleCandles.length - 1];
+  const lastDelta = latest.price - previous.close;
   const lastDeltaPercent = previous.close ? (lastDelta / previous.close) * 100 : 0;
 
   const yForPrice = (price: number) => paddingTop + ((max - price) / rangeValue) * plotHeight;
@@ -118,7 +157,7 @@ export function PriceChart({
         <div>
           <p className="text-sm font-medium text-foreground">График цены</p>
           <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
-            <p className="text-3xl font-semibold tracking-tight text-foreground">{formatPrice(latest.close, precision)} {currencySymbol}</p>
+            <p className="text-3xl font-semibold tracking-tight text-foreground">{formatPrice(latest.price, precision)} {currencySymbol}</p>
             <p className={cn('text-sm font-medium', lastDelta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
               {lastDelta >= 0 ? '+' : '-'}{formatPrice(Math.abs(lastDelta), precision)} {currencySymbol} ({lastDeltaPercent >= 0 ? '+' : ''}{lastDeltaPercent.toFixed(2)}%)
             </p>
@@ -128,20 +167,27 @@ export function PriceChart({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start rounded-xl border border-border/70 bg-muted/30 p-1">
-          {(['1D', '1W', '1M'] as ChartRange[]).map((item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => setRange(item)}
-              className={cn(
-                'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
-                range === item ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {item}
-            </button>
-          ))}
+        <div className="flex flex-col gap-2 self-start">
+          <div className="flex items-center gap-2 rounded-xl border border-border/70 bg-muted/30 p-1">
+            {(['1D', '1W', '1M'] as ChartRange[]).map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setRange(item)}
+                className={cn(
+                  'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                  range === item ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 rounded-xl border border-border/70 bg-muted/30 p-1">
+            <button type="button" onClick={() => setZoomLevel((value) => clamp(value / 1.5, 1, 8))} className="rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground">−</button>
+            <span className="px-2 text-xs text-muted-foreground">Zoom ×{zoomLevel.toFixed(1)}</span>
+            <button type="button" onClick={() => setZoomLevel((value) => clamp(value * 1.5, 1, 8))} className="rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-background hover:text-foreground">+</button>
+          </div>
         </div>
       </div>
 

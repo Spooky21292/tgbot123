@@ -1,3 +1,6 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { NextResponse } from 'next/server';
 import { getMarketCandles } from '@/lib/market-data';
 
@@ -14,7 +17,7 @@ export async function GET(request: Request) {
       interval: interval && ['1min', '15min', '1h', '1day'].includes(interval) ? interval : undefined,
       points: Number.isFinite(points) && points > 0 ? points : undefined
     });
-    return NextResponse.json({ ok: true, data: candles });
+    return NextResponse.json({ ok: true, data: candles }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
     return NextResponse.json({ ok: false, error: 'Не удалось получить историю цен' }, { status: 500 });
   }

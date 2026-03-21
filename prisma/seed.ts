@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { RUSSIAN_ASSETS } from '../lib/russian-assets';
 
 const prisma = new PrismaClient();
 
@@ -236,14 +237,13 @@ async function main() {
     prisma.user.create({ data: { name: 'Елена Соколова', email: 'adult@finskills.pro', passwordHash, ageGroup: '26+' } })
   ]);
 
-  const [sber, gazp, lkoh, ofz26238, ofz26243, ofz26248] = await Promise.all([
-    prisma.asset.create({ data: { symbol: 'SBER', name: 'Сбербанк ао', type: 'stock' } }),
-    prisma.asset.create({ data: { symbol: 'GAZP', name: 'Газпром', type: 'stock' } }),
-    prisma.asset.create({ data: { symbol: 'LKOH', name: 'ЛУКОЙЛ', type: 'stock' } }),
-    prisma.asset.create({ data: { symbol: 'SU26238RMFS4', name: 'ОФЗ 26238', type: 'bond' } }),
-    prisma.asset.create({ data: { symbol: 'SU26243RMFS4', name: 'ОФЗ 26243', type: 'bond' } }),
-    prisma.asset.create({ data: { symbol: 'SU26248RMFS3', name: 'ОФЗ 26248', type: 'bond' } })
-  ]);
+  const createdAssets = await Promise.all(
+    RUSSIAN_ASSETS.map((asset) => prisma.asset.create({
+      data: { symbol: asset.symbol, name: asset.name, type: asset.type }
+    }))
+  );
+
+  const assetBySymbol = Object.fromEntries(createdAssets.map((asset) => [asset.symbol, asset]));
 
   const [adminDemo, teenDemo, youngDemo, adultDemo] = await Promise.all([
     prisma.demoAccount.create({ data: { userId: admin.id, balance: 1000000, initialBalance: 1000000, currency: 'RUB' } }),
@@ -254,19 +254,19 @@ async function main() {
 
   await prisma.position.createMany({
     data: [
-      { accountId: youngDemo.id, assetId: sber.id, quantity: 120, averagePrice: 302.4 },
-      { accountId: youngDemo.id, assetId: lkoh.id, quantity: 6, averagePrice: 7180 },
-      { accountId: youngDemo.id, assetId: ofz26243.id, quantity: 15, averagePrice: 640.2 }
+      { accountId: youngDemo.id, assetId: assetBySymbol.SBER.id, quantity: 120, averagePrice: 302.4 },
+      { accountId: youngDemo.id, assetId: assetBySymbol.LKOH.id, quantity: 6, averagePrice: 7180 },
+      { accountId: youngDemo.id, assetId: assetBySymbol.SU26243RMFS4.id, quantity: 15, averagePrice: 640.2 }
     ]
   });
 
   await prisma.trade.createMany({
     data: [
-      { accountId: youngDemo.id, assetId: sber.id, side: 'BUY', quantity: 120, price: 302.4, total: 36288, realizedPnl: 0 },
-      { accountId: youngDemo.id, assetId: lkoh.id, side: 'BUY', quantity: 6, price: 7180, total: 43080, realizedPnl: 0 },
-      { accountId: youngDemo.id, assetId: ofz26243.id, side: 'BUY', quantity: 15, price: 640.2, total: 9603, realizedPnl: 0 },
-      { accountId: youngDemo.id, assetId: gazp.id, side: 'BUY', quantity: 80, price: 164.8, total: 13184, realizedPnl: 0 },
-      { accountId: youngDemo.id, assetId: gazp.id, side: 'SELL', quantity: 20, price: 169.1, total: 3382, realizedPnl: 86 }
+      { accountId: youngDemo.id, assetId: assetBySymbol.SBER.id, side: 'BUY', quantity: 120, price: 302.4, total: 36288, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: assetBySymbol.LKOH.id, side: 'BUY', quantity: 6, price: 7180, total: 43080, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: assetBySymbol.SU26243RMFS4.id, side: 'BUY', quantity: 15, price: 640.2, total: 9603, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: assetBySymbol.GAZP.id, side: 'BUY', quantity: 80, price: 164.8, total: 13184, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: assetBySymbol.GAZP.id, side: 'SELL', quantity: 20, price: 169.1, total: 3382, realizedPnl: 86 }
     ]
   });
 

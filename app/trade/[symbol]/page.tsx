@@ -39,7 +39,7 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
           <div className="space-y-6">
-            <PriceChart symbol={view.asset.symbol} candles={candles} />
+            <PriceChart symbol={view.asset.symbol} candles={candles} initialQuote={view.quote} />
 
             <Card>
               <CardHeader>
