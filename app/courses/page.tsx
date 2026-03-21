@@ -16,14 +16,16 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
   const courses = await getCourses(searchParams);
 
   return (
-    <Container className="py-12">
+    <Container className="py-10 sm:py-12">
       <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Курсы' }]} />
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="text-4xl font-semibold">Каталог курсов</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">Подберите программу под возраст, уровень подготовки и ближайшую жизненную задачу.</p>
+        <div className="max-w-2xl">
+          <h1 className="text-4xl font-semibold tracking-tight text-foreground">Каталог курсов</h1>
+          <p className="mt-3 text-base leading-7 text-muted-foreground">
+            Спокойные образовательные программы по бюджету, привычкам, безопасности и долгосрочным решениям.
+          </p>
         </div>
-        <form className="grid gap-3 rounded-[28px] border border-slate-200/80 bg-white p-4 shadow-soft sm:grid-cols-4 dark:bg-slate-950/70">
+        <form className="grid gap-3 rounded-2xl border border-border/80 bg-card p-4 sm:grid-cols-4">
           <Input name="search" placeholder="Поиск по курсам" defaultValue={searchParams?.search} />
           <Select name="ageGroup" defaultValue={searchParams?.ageGroup ?? ''}>
             <option value="">Все возрасты</option>
@@ -41,20 +43,20 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
         </form>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+      <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {courses.length ? (
           courses.map((course) => (
-            <Card key={course.id} className="rounded-[30px] border-slate-200/80">
+            <Card key={course.id}>
               <CardHeader>
                 <div className="flex items-center justify-between gap-3">
                   <Badge>{ageGroupLabel(course.ageGroup)}</Badge>
-                  <span className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{courseLevelLabel(course.level)}</span>
+                  <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{courseLevelLabel(course.level)}</span>
                 </div>
-                <CardTitle className="mt-4 text-2xl">{course.title}</CardTitle>
-                <CardDescription className="leading-6">{course.description}</CardDescription>
+                <CardTitle className="mt-3 text-xl">{course.title}</CardTitle>
+                <CardDescription>{course.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="mb-4 text-sm text-muted-foreground">{course.lessons.length} уроков · структурированный маршрут обучения</p>
+                <p className="mb-4 text-sm text-muted-foreground">{course.lessons.length} уроков · структурированная траектория</p>
                 <Button asChild>
                   <Link href={`/courses/${course.slug}`}>Открыть</Link>
                 </Button>
@@ -62,7 +64,7 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
             </Card>
           ))
         ) : (
-          <Card className="rounded-[30px] lg:col-span-3">
+          <Card className="lg:col-span-3">
             <CardContent className="pt-6 text-muted-foreground">Курсы не найдены. Попробуйте изменить фильтры или поисковый запрос.</CardContent>
           </Card>
         )}

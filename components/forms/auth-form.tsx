@@ -89,7 +89,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   });
 
   return (
-    <Card className="mx-auto w-full max-w-md rounded-[28px] border-slate-200/80 shadow-soft">
+    <Card className="mx-auto w-full max-w-md">
       <CardHeader>
         <CardTitle>{mode === 'login' ? 'Вход в FinSkills Pro' : 'Создать аккаунт'}</CardTitle>
       </CardHeader>

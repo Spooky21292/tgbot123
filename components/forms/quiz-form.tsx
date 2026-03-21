@@ -25,22 +25,42 @@ export function QuizForm({ quiz, lessonId }: { quiz: any; lessonId: string }) {
   });
 
   return (
-    <div className="space-y-6">
-      <Button variant="secondary" onClick={completeLesson} disabled={pending}>Отметить как пройдено</Button>
+    <div className="space-y-4">
+      <Button variant="secondary" onClick={completeLesson} disabled={pending}>Отметить урок как пройденный</Button>
       <Card>
-        <CardHeader><CardTitle>{quiz.title}</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>{quiz.title}</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-6">
           {quiz.questions.map((question: any, index: number) => (
-            <div key={question.id} className="space-y-3 rounded-2xl border p-4">
-              <p className="font-medium">{index + 1}. {question.question}</p>
-              {['A', 'B', 'C', 'D'].map((option) => {
-                const text = question[`option${option}` as const];
-                return <label key={option} className="flex cursor-pointer items-center gap-3 rounded-xl border p-3 hover:bg-muted"><input type="radio" name={question.id} checked={answers[question.id] === option} onChange={() => setAnswers((prev) => ({ ...prev, [question.id]: option }))} />{text}</label>;
-              })}
+            <div key={question.id} className="space-y-3 border-t border-border/70 pt-6 first:border-t-0 first:pt-0">
+              <p className="font-medium leading-7 text-foreground">{index + 1}. {question.question}</p>
+              <div className="space-y-2">
+                {['A', 'B', 'C', 'D'].map((option) => {
+                  const text = question[`option${option}` as const];
+                  return (
+                    <label key={option} className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/80 px-4 py-3 text-sm leading-6 transition-colors hover:bg-muted/50">
+                      <input
+                        type="radio"
+                        name={question.id}
+                        checked={answers[question.id] === option}
+                        onChange={() => setAnswers((prev) => ({ ...prev, [question.id]: option }))}
+                        className="mt-1"
+                      />
+                      <span>{text}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           ))}
           <Button onClick={submit} disabled={pending}>Завершить тест</Button>
-          {result && <div className="rounded-2xl bg-secondary p-4"><p className="font-semibold">Результат: {result.score}%</p><p className="text-sm text-muted-foreground">{result.feedback}</p></div>}
+          {result && (
+            <div className="rounded-xl border border-border/80 bg-muted/40 p-4">
+              <p className="font-semibold text-foreground">Результат: {result.score}%</p>
+              <p className="mt-1 text-sm text-muted-foreground">{result.feedback}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

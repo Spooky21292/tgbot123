@@ -21,7 +21,7 @@ export default async function LessonPage({ params }: { params: { slug: string; l
   if (!lesson) notFound();
 
   return (
-    <Container className="py-12">
+    <Container className="py-10 sm:py-12">
       <Breadcrumbs
         items={[
           { label: 'Главная', href: '/' },
@@ -31,41 +31,51 @@ export default async function LessonPage({ params }: { params: { slug: string; l
         ]}
       />
 
-      <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <div>
-          <div className="rounded-[32px] border border-slate-200/80 bg-white p-8 shadow-soft dark:bg-slate-950/70">
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2"><PlayCircle className="h-4 w-4" /> Видео + конспект</span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2"><Clock3 className="h-4 w-4" /> {lesson.durationMinutes} минут</span>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-border/80 bg-card p-6 sm:p-8">
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5">
+                <PlayCircle className="h-4 w-4" />
+                Видео + конспект
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5">
+                <Clock3 className="h-4 w-4" />
+                {lesson.durationMinutes} минут
+              </span>
             </div>
-            <h1 className="mt-5 text-4xl font-semibold">{lesson.title}</h1>
-            <p className="mt-3 text-lg leading-7 text-muted-foreground">{lesson.description}</p>
-            <div className="mt-6 overflow-hidden rounded-[28px] border border-slate-200/80 bg-slate-950">
+            <h1 className="mt-5 max-w-4xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              {lesson.title}
+            </h1>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-muted-foreground">{lesson.description}</p>
+            <div className="mt-8 overflow-hidden rounded-2xl border border-border/80 bg-slate-950">
               <iframe title={lesson.title} src={lesson.videoUrl} className="aspect-video w-full" allowFullScreen />
             </div>
           </div>
 
-          <article className="mt-8 rounded-[32px] border border-slate-200/80 bg-white p-8 shadow-soft dark:bg-slate-950/70">
-            <LessonContent content={lesson.content} />
+          <article className="rounded-2xl border border-border/80 bg-card px-6 py-8 sm:px-10 sm:py-10">
+            <div className="mx-auto max-w-3xl">
+              <LessonContent content={lesson.content} />
+            </div>
           </article>
         </div>
 
         <div className="space-y-6">
-          <Card className="rounded-[32px] border-slate-200/80">
+          <Card>
             <CardHeader>
-              <CardTitle>Что вы получите после урока</CardTitle>
+              <CardTitle>Как пройти урок с пользой</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
-              <p>— Понимание ключевой темы без перегруза терминами.</p>
-              <p>— Примеры из жизни подростков, студентов или молодых взрослых.</p>
-              <p>— Маленькое действие, которое можно выполнить уже сегодня.</p>
+              <p>Сначала посмотрите видео, затем прочитайте конспект в спокойном темпе.</p>
+              <p>Отмечайте один практический вывод, который можно применить сегодня.</p>
+              <p>В конце пройдите мини-тест, чтобы закрепить ключевые идеи.</p>
             </CardContent>
           </Card>
 
           {lesson.quiz ? (
             <QuizForm quiz={lesson.quiz} lessonId={lesson.id} />
           ) : (
-            <div className="rounded-[32px] border border-slate-200/80 p-6">
+            <div className="rounded-2xl border border-border/80 bg-card p-6 text-sm text-muted-foreground">
               Тест для этого урока пока не добавлен.
             </div>
           )}

@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarClock, CheckCircle2, Sparkles, Target } from 'lucide-react';
+import { ArrowRight, CalendarClock, CheckCircle2, Target } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -43,124 +43,131 @@ export default async function DashboardPage() {
     .slice(0, 4)
     .map((item) => ({
       id: item.id,
-      title: `Завершён урок «${item.lesson.title}»`,
-      meta: item.completedAt ? new Date(item.completedAt).toLocaleDateString('ru-RU') : 'Сегодня'
+      title: item.lesson.title,
+      meta: `${item.lesson.course.title} · ${item.completedAt ? new Date(item.completedAt).toLocaleDateString('ru-RU') : 'Сегодня'}`
     }));
 
   return (
-    <Container className="py-12">
-      <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-        <Card className="rounded-[32px] border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-900 text-white">
-          <CardContent className="pt-8">
-            <p className="text-sm uppercase tracking-[0.24em] text-sky-200">Личный кабинет</p>
-            <h1 className="mt-3 text-4xl font-semibold">Здравствуйте, {session.user.name}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-200">Ваш прогресс собран в одном месте: следующие шаги, завершённые уроки, результаты тестов и ближайшие вебинары.</p>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[24px] bg-white/10 p-5">
-                <p className="text-sm text-sky-100">Общий прогресс</p>
-                <p className="mt-2 text-4xl font-semibold">{formatPercent(completion)}</p>
-              </div>
-              <div className="rounded-[24px] bg-white/10 p-5">
-                <p className="text-sm text-sky-100">Начатые курсы</p>
-                <p className="mt-2 text-4xl font-semibold">{startedCourses}</p>
-              </div>
-              <div className="rounded-[24px] bg-white/10 p-5">
-                <p className="text-sm text-sky-100">Квизы</p>
-                <p className="mt-2 text-4xl font-semibold">{quizResults.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-[32px] border-slate-200/80">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-primary" /> Рекомендуем продолжить</CardTitle>
-            <CardDescription>Следующий логичный шаг по вашей траектории</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {nextLesson ? (
-              <div className="space-y-4">
-                <div className="rounded-[24px] bg-secondary p-5">
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{nextLesson.course.title}</p>
-                  <p className="mt-2 text-xl font-semibold">{nextLesson.lesson.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{nextLesson.lesson.description}</p>
-                </div>
-                <Button asChild>
-                  <Link href={`/courses/${nextLesson.course.slug}/lessons/${nextLesson.lesson.id}`}>Открыть урок <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                </Button>
-              </div>
-            ) : (
-              <p className="text-sm leading-6 text-muted-foreground">Все текущие уроки пройдены. Перейдите в каталог, чтобы открыть новую программу.</p>
-            )}
-          </CardContent>
-        </Card>
+    <Container className="py-10 sm:py-12">
+      <div className="max-w-3xl">
+        <p className="text-sm font-medium text-muted-foreground">Личный кабинет</p>
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">Здравствуйте, {session.user.name}</h1>
+        <p className="mt-3 text-base leading-7 text-muted-foreground">
+          Спокойное рабочее пространство: следующий шаг, прогресс по курсам и ближайшие события в одном месте.
+        </p>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card className="rounded-[32px] border-slate-200/80">
+      <div className="mt-8 grid gap-4 md:grid-cols-3">
+        {[
+          ['Общий прогресс', formatPercent(completion)],
+          ['Начатые курсы', String(startedCourses)],
+          ['Пройденные квизы', String(quizResults.length)]
+        ].map(([label, value]) => (
+          <Card key={label}>
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">{label}</p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <Card>
           <CardHeader>
-            <CardTitle>Динамика по курсам</CardTitle>
-            <CardDescription>Прогресс по ключевым программам в одном графике</CardDescription>
+            <CardTitle>Прогресс по курсам</CardTitle>
+            <CardDescription>График остаётся компактным, чтобы не отвлекать от главного.</CardDescription>
           </CardHeader>
           <CardContent>
             <ProgressChart data={chartData} />
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
-          <Card className="rounded-[32px] border-slate-200/80">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-accent" /> Последняя активность</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {recentActivity.length ? recentActivity.map((item) => (
-                <div key={item.id} className="rounded-[24px] border border-slate-200/80 p-4">
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-sm text-muted-foreground">{item.meta}</p>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              Продолжить обучение
+            </CardTitle>
+            <CardDescription>Следующий логичный шаг по вашей текущей траектории.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {nextLesson ? (
+              <div className="space-y-5">
+                <div className="rounded-xl border border-border/80 bg-muted/40 p-5">
+                  <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                    {nextLesson.course.title}
+                  </p>
+                  <p className="mt-2 text-xl font-semibold tracking-tight text-foreground">{nextLesson.lesson.title}</p>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{nextLesson.lesson.description}</p>
                 </div>
-              )) : <p className="text-sm text-muted-foreground">Пока нет завершённых уроков — начните с первого модуля.</p>}
-            </CardContent>
-          </Card>
+                <Button asChild>
+                  <Link href={`/courses/${nextLesson.course.slug}/lessons/${nextLesson.lesson.id}`}>
+                    Открыть урок
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm leading-6 text-muted-foreground">
+                Все текущие уроки пройдены. Перейдите в каталог, чтобы выбрать новую программу.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-          <Card className="rounded-[32px] border-slate-200/80">
-            <CardHeader>
-              <CardTitle>Результаты тестов</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {quizResults.length ? quizResults.map((result) => (
-                <div key={result.id} className="rounded-[24px] border border-slate-200/80 p-4">
-                  <p className="font-medium">{result.quiz.lesson.title}</p>
-                  <p className="text-sm text-muted-foreground">{result.score}% · {getQuizFeedback(result.score)}</p>
-                </div>
-              )) : <p className="text-sm text-muted-foreground">Пройдите первый тест — здесь появятся результаты.</p>}
-            </CardContent>
-          </Card>
+      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              Недавняя активность
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {recentActivity.length ? recentActivity.map((item) => (
+              <div key={item.id} className="border-t border-border/70 pt-4 first:border-t-0 first:pt-0">
+                <p className="font-medium text-foreground">{item.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{item.meta}</p>
+              </div>
+            )) : <p className="text-sm leading-6 text-muted-foreground">Пока нет завершённых уроков — начните с первого модуля.</p>}
+          </CardContent>
+        </Card>
 
-          <Card className="rounded-[32px] border-slate-200/80">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><CalendarClock className="h-5 w-5 text-primary" /> Ближайшие вебинары</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {webinars.map((webinar) => (
-                <div key={webinar.id} className="rounded-[24px] border border-slate-200/80 p-4">
-                  <p className="font-medium">{webinar.title}</p>
-                  <p className="text-sm text-muted-foreground">{new Date(webinar.date).toLocaleString('ru-RU')}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Результаты тестов</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {quizResults.length ? quizResults.map((result) => (
+              <div key={result.id} className="border-t border-border/70 pt-4 first:border-t-0 first:pt-0">
+                <p className="font-medium text-foreground">{result.quiz.lesson.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{result.score}% · {getQuizFeedback(result.score)}</p>
+              </div>
+            )) : <p className="text-sm leading-6 text-muted-foreground">Пройдите первый тест — здесь появятся результаты.</p>}
+          </CardContent>
+        </Card>
 
-          <Card className="rounded-[32px] border-slate-200/80 bg-secondary/40">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-accent" /> Рекомендации</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm leading-7 text-muted-foreground">
-              <p>• Повторите последний квиз, если результат ниже 60%.</p>
-              <p>• Запланируйте один финансовый ритуал на неделю: учёт расходов или проверку целей.</p>
-              <p>• Подключите Telegram-бота, чтобы не терять темп между уроками.</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CalendarClock className="h-4 w-4 text-primary" />
+              Ближайшие вебинары
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {webinars.map((webinar) => (
+              <div key={webinar.id} className="border-t border-border/70 pt-4 first:border-t-0 first:pt-0">
+                <p className="font-medium text-foreground">{webinar.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{new Date(webinar.date).toLocaleString('ru-RU')}</p>
+              </div>
+            ))}
+            <div className="rounded-xl border border-border/80 bg-muted/30 p-4 text-sm leading-6 text-muted-foreground">
+              Один фокус на неделю: завершите следующий урок и повторите квиз, если результат был ниже 60%.
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Container>
   );

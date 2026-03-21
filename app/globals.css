@@ -3,43 +3,86 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 47.4% 11.2%;
+  --background: 210 20% 98%;
+  --foreground: 222 24% 14%;
   --card: 0 0% 100%;
-  --card-foreground: 222.2 47.4% 11.2%;
-  --primary: 221 83% 24%;
+  --card-foreground: 222 24% 14%;
+  --primary: 222 47% 24%;
   --primary-foreground: 210 40% 98%;
-  --secondary: 196 75% 94%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 160 84% 34%;
+  --secondary: 210 24% 96%;
+  --secondary-foreground: 222 24% 18%;
+  --muted: 210 20% 96%;
+  --muted-foreground: 215 14% 42%;
+  --accent: 222 47% 24%;
   --accent-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221 83% 24%;
+  --border: 214 18% 88%;
+  --input: 214 18% 88%;
+  --ring: 222 47% 24%;
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 6.5%;
-  --card-foreground: 210 40% 98%;
-  --primary: 199 89% 55%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 159 64% 45%;
-  --accent-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 199 89% 55%;
+  --background: 222 22% 8%;
+  --foreground: 210 20% 96%;
+  --card: 222 20% 10%;
+  --card-foreground: 210 20% 96%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222 24% 14%;
+  --secondary: 222 16% 15%;
+  --secondary-foreground: 210 20% 96%;
+  --muted: 222 16% 15%;
+  --muted-foreground: 214 14% 70%;
+  --accent: 210 40% 98%;
+  --accent-foreground: 222 24% 14%;
+  --border: 222 14% 18%;
+  --input: 222 14% 18%;
+  --ring: 210 40% 98%;
 }
 
-* { @apply border-border; }
-html { scroll-behavior: smooth; }
-body { @apply bg-background text-foreground antialiased; }
-.prose-finance h1, .prose-finance h2, .prose-finance h3 { @apply text-slate-900 dark:text-white font-semibold; }
-.prose-finance p, .prose-finance li { @apply text-slate-600 dark:text-slate-300 leading-7; }
+* {
+  @apply border-border;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+  background-image: radial-gradient(circle at top, rgba(15, 23, 42, 0.03), transparent 40%);
+}
+
+main {
+  @apply pb-16;
+}
+
+::selection {
+  @apply bg-primary text-primary-foreground;
+}
+
+.prose-finance {
+  @apply space-y-6 text-[15px] leading-8 text-slate-600 dark:text-slate-300;
+}
+
+.prose-finance h1,
+.prose-finance h2,
+.prose-finance h3,
+.prose-finance h4 {
+  @apply font-semibold tracking-tight text-slate-950 dark:text-white;
+}
+
+.prose-finance h1 {
+  @apply text-3xl md:text-[2.2rem];
+}
+
+.prose-finance h2 {
+  @apply pt-6 text-2xl;
+}
+
+.prose-finance h3 {
+  @apply pt-3 text-xl;
+}
+
+.prose-finance p,
+.prose-finance li {
+  @apply max-w-none text-slate-600 dark:text-slate-300;
+}
