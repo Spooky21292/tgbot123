@@ -24,7 +24,7 @@ export default async function TradePage({ searchParams }: { searchParams?: { sea
             <Badge>Демо-счёт</Badge>
             <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground">Учебный торговый симулятор</h1>
             <p className="mt-3 text-base leading-7 text-muted-foreground">
-              Только виртуальный баланс, рыночные данные и образовательная практика. Никаких депозитов, вывода средств и реального исполнения.
+              Только виртуальный баланс, российские акции и облигации, рыночные данные и образовательная практика. Никаких депозитов, вывода средств и реального исполнения.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -37,10 +37,10 @@ export default async function TradePage({ searchParams }: { searchParams?: { sea
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {[
-            ['Свободный баланс', `$${data.account.balance.toFixed(2)}`],
-            ['Инвестировано', `$${data.metrics.investedAmount.toFixed(2)}`],
-            ['Рыночная стоимость', `$${data.metrics.portfolioValue.toFixed(2)}`],
-            ['Нереализованный PnL', `${data.metrics.unrealizedPnl >= 0 ? '+' : ''}$${data.metrics.unrealizedPnl.toFixed(2)}`],
+            ['Свободный баланс', `${data.account.balance.toFixed(2)} ₽`],
+            ['Инвестировано', `${data.metrics.investedAmount.toFixed(2)} ₽`],
+            ['Рыночная стоимость', `${data.metrics.portfolioValue.toFixed(2)} ₽`],
+            ['Нереализованный PnL', `${data.metrics.unrealizedPnl >= 0 ? '+' : ''}${data.metrics.unrealizedPnl.toFixed(2)} ₽`],
             ['Доходность', `${data.metrics.totalReturn >= 0 ? '+' : ''}${data.metrics.totalReturn.toFixed(2)}%`]
           ].map(([label, value]) => (
             <Card key={label}>
@@ -67,14 +67,14 @@ export default async function TradePage({ searchParams }: { searchParams?: { sea
                   </div>
                   <div className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2 md:min-w-[340px]">
                     <span>Объём: {position.quantity.toFixed(4)}</span>
-                    <span>Средняя: ${position.averagePrice.toFixed(2)}</span>
-                    <span>Текущая: ${quote.price.toFixed(2)}</span>
+                    <span>Средняя: {position.averagePrice.toFixed(2)} ₽</span>
+                    <span>Текущая: {quote.price.toFixed(2)} ₽</span>
                     <span className={unrealizedPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
-                      PnL: {unrealizedPnl >= 0 ? '+' : ''}${unrealizedPnl.toFixed(2)}
+                      PnL: {unrealizedPnl >= 0 ? '+' : ''}{unrealizedPnl.toFixed(2)} ₽
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <p className="text-sm font-medium text-foreground">${marketValue.toFixed(2)}</p>
+                    <p className="text-sm font-medium text-foreground">{marketValue.toFixed(2)} ₽</p>
                     <Button variant="secondary" asChild>
                       <Link href={`/trade/${encodeURIComponent(position.asset.symbol)}`}>Открыть</Link>
                     </Button>
@@ -106,7 +106,7 @@ export default async function TradePage({ searchParams }: { searchParams?: { sea
                       <p className="text-sm text-muted-foreground">{asset.name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-foreground">${quote.price.toFixed(asset.symbol === 'EUR/USD' ? 4 : 2)}</p>
+                      <p className="font-medium text-foreground">{quote.price.toFixed(2)} ₽</p>
                       <p className={quote.changePercent >= 0 ? 'text-sm text-emerald-600 dark:text-emerald-400' : 'text-sm text-rose-600 dark:text-rose-400'}>
                         {quote.changePercent >= 0 ? '+' : ''}{quote.changePercent.toFixed(2)}%
                       </p>
@@ -125,7 +125,7 @@ export default async function TradePage({ searchParams }: { searchParams?: { sea
               <CardDescription>Это учебный модуль, а не брокерский интерфейс.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
-              <p>• Баланс виртуальный и начинается со $100,000.</p>
+              <p>• Баланс виртуальный и начинается с 1 000 000 ₽.</p>
               <p>• Рыночные данные приходят через серверный market-data слой и могут временно быть недоступны.</p>
               <p>• Сначала изучайте риск, размер позиции и дисциплину — только потом смотрите на доходность.</p>
             </CardContent>
@@ -150,8 +150,8 @@ export default async function TradePage({ searchParams }: { searchParams?: { sea
                   </div>
                   <div className="grid gap-1 text-muted-foreground sm:grid-cols-3 md:min-w-[360px]">
                     <span>Qty: {trade.quantity.toFixed(4)}</span>
-                    <span>Цена: ${trade.price.toFixed(2)}</span>
-                    <span>Итого: ${trade.total.toFixed(2)}</span>
+                    <span>Цена: {trade.price.toFixed(2)} ₽</span>
+                    <span>Итого: {trade.total.toFixed(2)} ₽</span>
                   </div>
                 </div>
               )) : <p className="text-sm leading-6 text-muted-foreground">История сделок появится после первой учебной операции.</p>}

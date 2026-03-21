@@ -147,7 +147,7 @@ model DemoAccount {
   userId         String     @unique
   balance        Float
   initialBalance Float
-  currency       String     @default("USD")
+  currency       String     @default("RUB")
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)

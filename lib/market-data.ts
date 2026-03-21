@@ -19,21 +19,103 @@ export type MarketCandle = {
 
 export type MarketInterval = '1min' | '15min' | '1h' | '1day';
 
-const provider = (process.env.MARKET_DATA_PROVIDER ?? 'demo').toLowerCase();
+export type RussianAssetMeta = {
+  symbol: string;
+  name: string;
+  type: 'stock' | 'bond';
+  board: 'TQBR' | 'TQOB';
+  market: 'shares' | 'bonds';
+  currency: 'RUB';
+  nominal?: number;
+  annualCouponPercent?: number;
+};
+
+const provider = (process.env.MARKET_DATA_PROVIDER ?? 'moex').toLowerCase();
 const apiKey = process.env.MARKET_DATA_API_KEY ?? '';
+
+const RUSSIAN_ASSET_META: Record<string, RussianAssetMeta> = {
+  SBER: {
+    symbol: 'SBER',
+    name: 'Сбербанк ао',
+    type: 'stock',
+    board: 'TQBR',
+    market: 'shares',
+    currency: 'RUB'
+  },
+  GAZP: {
+    symbol: 'GAZP',
+    name: 'Газпром',
+    type: 'stock',
+    board: 'TQBR',
+    market: 'shares',
+    currency: 'RUB'
+  },
+  LKOH: {
+    symbol: 'LKOH',
+    name: 'ЛУКОЙЛ',
+    type: 'stock',
+    board: 'TQBR',
+    market: 'shares',
+    currency: 'RUB'
+  },
+  SU26238RMFS4: {
+    symbol: 'SU26238RMFS4',
+    name: 'ОФЗ 26238',
+    type: 'bond',
+    board: 'TQOB',
+    market: 'bonds',
+    currency: 'RUB',
+    nominal: 1000,
+    annualCouponPercent: 7.1
+  },
+  SU26243RMFS4: {
+    symbol: 'SU26243RMFS4',
+    name: 'ОФЗ 26243',
+    type: 'bond',
+    board: 'TQOB',
+    market: 'bonds',
+    currency: 'RUB',
+    nominal: 1000,
+    annualCouponPercent: 9.8
+  },
+  SU26248RMFS3: {
+    symbol: 'SU26248RMFS3',
+    name: 'ОФЗ 26248',
+    type: 'bond',
+    board: 'TQOB',
+    market: 'bonds',
+    currency: 'RUB',
+    nominal: 1000,
+    annualCouponPercent: 12.25
+  }
+};
 
 function hashSymbol(symbol: string) {
   return symbol.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
 }
 
+export function getRussianAssetMeta(symbol: string) {
+  return RUSSIAN_ASSET_META[symbol.toUpperCase()] ?? null;
+}
+
+export function getCurrencySymbol(symbol: string) {
+  const meta = getRussianAssetMeta(symbol);
+  return meta?.currency === 'RUB' ? '₽' : '$';
+}
+
+function pricePrecision(symbol: string) {
+  const meta = getRussianAssetMeta(symbol);
+  return meta?.type === 'bond' ? 2 : 2;
+}
+
 function basePriceForSymbol(symbol: string) {
   const map: Record<string, number> = {
-    AAPL: 212.4,
-    TSLA: 178.3,
-    NVDA: 901.5,
-    'BTC/USD': 68250,
-    'ETH/USD': 3520,
-    'EUR/USD': 1.09
+    SBER: 318.4,
+    GAZP: 168.3,
+    LKOH: 7420.0,
+    SU26238RMFS4: 583.2,
+    SU26243RMFS4: 646.8,
+    SU26248RMFS3: 912.5
   };
   return map[symbol] ?? 100 + hashSymbol(symbol);
 }
@@ -41,18 +123,21 @@ function basePriceForSymbol(symbol: string) {
 function demoQuote(symbol: string): MarketQuote {
   const seed = hashSymbol(symbol);
   const base = basePriceForSymbol(symbol);
-  const wave = Math.sin(seed) * (symbol.includes('USD') && symbol.includes('BTC') ? 450 : base * 0.018);
-  const price = Number((base + wave).toFixed(symbol.includes('EUR/USD') ? 4 : 2));
+  const meta = getRussianAssetMeta(symbol);
+  const wave = Math.sin(seed) * (meta?.type === 'bond' ? base * 0.003 : base * 0.018);
+  const precision = pricePrecision(symbol);
+  const price = Number((base + wave).toFixed(precision));
   const prev = base;
-  const change = Number((price - prev).toFixed(symbol.includes('EUR/USD') ? 4 : 2));
+  const change = Number((price - prev).toFixed(precision));
   const changePercent = Number(((change / prev) * 100).toFixed(2));
-  return { symbol, price, change, changePercent, asOf: new Date().toISOString(), source: 'demo' };
+  return { symbol, price, change, changePercent, asOf: new Date().toISOString(), source: 'demo-ru' };
 }
 
 function demoCandles(symbol: string, points = 30, interval: MarketInterval = '1day'): MarketCandle[] {
   const base = basePriceForSymbol(symbol);
   const seed = hashSymbol(symbol);
-  const precision = symbol === 'EUR/USD' ? 4 : 2;
+  const precision = pricePrecision(symbol);
+  const meta = getRussianAssetMeta(symbol);
   const intervalMs: Record<MarketInterval, number> = {
     '1min': 60 * 1000,
     '15min': 15 * 60 * 1000,
@@ -60,12 +145,12 @@ function demoCandles(symbol: string, points = 30, interval: MarketInterval = '1d
     '1day': 24 * 60 * 60 * 1000
   };
   const amplitude = interval === '1min'
-    ? (symbol.includes('BTC') ? 120 : base * 0.0025)
+    ? (meta?.type === 'bond' ? base * 0.0012 : base * 0.0025)
     : interval === '15min'
-      ? (symbol.includes('BTC') ? 260 : base * 0.004)
+      ? (meta?.type === 'bond' ? base * 0.0018 : base * 0.004)
       : interval === '1h'
-        ? (symbol.includes('BTC') ? 520 : base * 0.008)
-        : (symbol.includes('BTC') ? 900 : base * 0.015);
+        ? (meta?.type === 'bond' ? base * 0.0024 : base * 0.008)
+        : (meta?.type === 'bond' ? base * 0.0045 : base * 0.015);
 
   return Array.from({ length: points }, (_, index) => {
     const step = points - index;
@@ -80,28 +165,109 @@ function demoCandles(symbol: string, points = 30, interval: MarketInterval = '1d
   });
 }
 
+function moexCandleInterval(interval: MarketInterval) {
+  if (interval === '1min') return 1;
+  if (interval === '1h') return 60;
+  return 24;
+}
+
+function moexFromDate(interval: MarketInterval) {
+  const now = new Date();
+  const from = new Date(now);
+  if (interval === '1min') {
+    from.setDate(now.getDate() - 2);
+  } else if (interval === '1h') {
+    from.setDate(now.getDate() - 10);
+  } else {
+    from.setMonth(now.getMonth() - 2);
+  }
+  return from.toISOString().slice(0, 10);
+}
+
+async function fetchMoexJson(url: string) {
+  const response = await fetch(url, {
+    headers: {
+      Accept: 'application/json'
+    },
+    next: { revalidate: 60 }
+  });
+  if (!response.ok) return null;
+  return response.json();
+}
+
+function getRowValue(block: any, field: string) {
+  const columns = block?.columns;
+  const row = Array.isArray(block?.data) ? block.data[0] : null;
+  if (!columns || !row) return null;
+  const index = columns.indexOf(field);
+  return index >= 0 ? row[index] : null;
+}
+
+async function fetchMoexQuote(symbol: string): Promise<MarketQuote | null> {
+  const meta = getRussianAssetMeta(symbol);
+  if (!meta) return null;
+
+  const url = `https://iss.moex.com/iss/engines/stock/markets/${meta.market}/boards/${meta.board}/securities/${symbol}.json?iss.meta=off&iss.only=marketdata,securities`;
+  const data = await fetchMoexJson(url);
+  if (!data) return null;
+
+  const marketPriceRaw =
+    getRowValue(data.marketdata, 'LAST') ??
+    getRowValue(data.marketdata, 'LCURRENTPRICE') ??
+    getRowValue(data.marketdata, 'MARKETPRICE') ??
+    getRowValue(data.securities, 'PREVLEGALCLOSEPRICE');
+
+  const prevPriceRaw =
+    getRowValue(data.marketdata, 'PREVPRICE') ??
+    getRowValue(data.securities, 'PREVWAPRICE') ??
+    getRowValue(data.securities, 'PREVPRICE');
+
+  const price = Number(marketPriceRaw ?? 0);
+  const prev = Number(prevPriceRaw ?? 0);
+  if (!price) return null;
+
+  const change = prev ? price - prev : 0;
+  const changePercent = prev ? (change / prev) * 100 : 0;
+
+  return {
+    symbol,
+    price: Number(price.toFixed(pricePrecision(symbol))),
+    change: Number(change.toFixed(pricePrecision(symbol))),
+    changePercent: Number(changePercent.toFixed(2)),
+    asOf: new Date().toISOString(),
+    source: 'moex'
+  };
+}
+
+async function fetchMoexCandles(symbol: string, interval: MarketInterval = '1day', points = 30): Promise<MarketCandle[] | null> {
+  const meta = getRussianAssetMeta(symbol);
+  if (!meta) return null;
+
+  const url = `https://iss.moex.com/iss/engines/stock/markets/${meta.market}/boards/${meta.board}/securities/${symbol}/candles.json?iss.meta=off&interval=${moexCandleInterval(interval)}&from=${moexFromDate(interval)}`;
+  const data = await fetchMoexJson(url);
+  const candles = Array.isArray(data?.candles?.data) ? data.candles.data : null;
+  const columns = data?.candles?.columns;
+  if (!candles || !columns) return null;
+
+  const get = (row: any[], field: string) => {
+    const index = columns.indexOf(field);
+    return index >= 0 ? row[index] : null;
+  };
+
+  return candles.slice(-points).map((row: any[]) => ({
+    time: new Date(get(row, 'begin')).toISOString(),
+    open: Number(get(row, 'open')),
+    high: Number(get(row, 'high')),
+    low: Number(get(row, 'low')),
+    close: Number(get(row, 'close'))
+  })).filter((item) => item.open && item.high && item.low && item.close);
+}
+
 async function fetchAlphaVantageQuote(symbol: string): Promise<MarketQuote | null> {
   if (!apiKey) return null;
-  const isCrypto = symbol === 'BTC/USD' || symbol === 'ETH/USD';
-  const isFx = symbol === 'EUR/USD';
-  let url = '';
-  if (isCrypto) {
-    const [from, to] = symbol.split('/');
-    url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${from}&to_currency=${to}&apikey=${apiKey}`;
-  } else if (isFx) {
-    const [from, to] = symbol.split('/');
-    url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${from}&to_currency=${to}&apikey=${apiKey}`;
-  } else {
-    url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
-  }
-  const response = await fetch(url, { next: { revalidate: 300 } });
+  const response = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`, { next: { revalidate: 300 } });
   if (!response.ok) return null;
   const data = await response.json();
-  if (isCrypto || isFx) {
-    const rate = Number(data?.['Realtime Currency Exchange Rate']?.['5. Exchange Rate']);
-    if (!rate) return null;
-    return { symbol, price: rate, change: 0, changePercent: 0, asOf: new Date().toISOString(), source: 'alphavantage' };
-  }
   const quote = data?.['Global Quote'];
   const price = Number(quote?.['05. price']);
   const change = Number(quote?.['09. change']);
@@ -112,8 +278,7 @@ async function fetchAlphaVantageQuote(symbol: string): Promise<MarketQuote | nul
 
 async function fetchTwelveDataQuote(symbol: string): Promise<MarketQuote | null> {
   if (!apiKey) return null;
-  const providerSymbol = symbol.replace('/', '/');
-  const response = await fetch(`https://api.twelvedata.com/quote?symbol=${encodeURIComponent(providerSymbol)}&apikey=${apiKey}`, { next: { revalidate: 120 } });
+  const response = await fetch(`https://api.twelvedata.com/quote?symbol=${encodeURIComponent(symbol)}&apikey=${apiKey}`, { next: { revalidate: 120 } });
   if (!response.ok) return null;
   const data = await response.json();
   const price = Number(data?.close);
@@ -129,32 +294,19 @@ async function fetchTwelveDataQuote(symbol: string): Promise<MarketQuote | null>
 }
 
 async function fetchAlphaVantageCandles(symbol: string, interval: MarketInterval = '1day', points = 30): Promise<MarketCandle[] | null> {
-  if (!apiKey) return null;
-  const isCrypto = symbol === 'BTC/USD' || symbol === 'ETH/USD';
-  const isFx = symbol === 'EUR/USD';
-  let url = '';
-  if (interval !== '1day') return null;
-  if (isCrypto) {
-    const [from, to] = symbol.split('/');
-    url = `https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=${from}&market=${to}&apikey=${apiKey}`;
-  } else if (isFx) {
-    const [from, to] = symbol.split('/');
-    url = `https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=${from}&to_symbol=${to}&apikey=${apiKey}`;
-  } else {
-    url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
-  }
-  const response = await fetch(url, { next: { revalidate: 300 } });
+  if (!apiKey || interval !== '1day') return null;
+  const response = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`, { next: { revalidate: 300 } });
   if (!response.ok) return null;
   const data = await response.json();
-  const raw = data['Time Series (Daily)'] ?? data['Time Series FX (Daily)'] ?? data['Time Series (Digital Currency Daily)'];
+  const raw = data['Time Series (Daily)'];
   if (!raw) return null;
   const entries = Object.entries(raw).slice(0, points).reverse();
   return entries.map(([time, value]: any) => ({
     time: new Date(time).toISOString(),
-    open: Number(value['1. open'] ?? value['1a. open (USD)']),
-    high: Number(value['2. high'] ?? value['2a. high (USD)']),
-    low: Number(value['3. low'] ?? value['3a. low (USD)']),
-    close: Number(value['4. close'] ?? value['4a. close (USD)'])
+    open: Number(value['1. open']),
+    high: Number(value['2. high']),
+    low: Number(value['3. low']),
+    close: Number(value['4. close'])
   }));
 }
 
@@ -173,9 +325,31 @@ async function fetchTwelveDataCandles(symbol: string, interval: MarketInterval =
   }));
 }
 
+export function getBondIncomePreview(symbol: string, quantity = 1) {
+  const meta = getRussianAssetMeta(symbol);
+  if (!meta || meta.type !== 'bond' || !meta.nominal || !meta.annualCouponPercent) {
+    return null;
+  }
+
+  const annualIncome = (meta.nominal * meta.annualCouponPercent / 100) * quantity;
+  return {
+    quantity,
+    monthly: Number((annualIncome / 12).toFixed(2)),
+    semiAnnual: Number((annualIncome / 2).toFixed(2)),
+    annual: Number(annualIncome.toFixed(2)),
+    annualCouponPercent: meta.annualCouponPercent,
+    nominal: meta.nominal,
+    currency: meta.currency
+  };
+}
+
 export async function getMarketQuote(symbol: string): Promise<MarketQuote> {
   const normalized = symbol.toUpperCase();
   try {
+    if (provider === 'moex') {
+      const quote = await fetchMoexQuote(normalized);
+      if (quote) return quote;
+    }
     if (provider === 'alphavantage') {
       const quote = await fetchAlphaVantageQuote(normalized);
       if (quote) return quote;
@@ -195,6 +369,10 @@ export async function getMarketCandles(symbol: string, options?: { interval?: Ma
   const interval = options?.interval ?? '1day';
   const points = options?.points ?? 30;
   try {
+    if (provider === 'moex') {
+      const candles = await fetchMoexCandles(normalized, interval, points);
+      if (candles?.length) return candles;
+    }
     if (provider === 'alphavantage') {
       const candles = await fetchAlphaVantageCandles(normalized, interval, points);
       if (candles?.length) return candles;

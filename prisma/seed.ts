@@ -236,37 +236,37 @@ async function main() {
     prisma.user.create({ data: { name: 'Елена Соколова', email: 'adult@finskills.pro', passwordHash, ageGroup: '26+' } })
   ]);
 
-  const [aapl, tsla, nvda, btc, eth, eurusd] = await Promise.all([
-    prisma.asset.create({ data: { symbol: 'AAPL', name: 'Apple Inc.', type: 'stock' } }),
-    prisma.asset.create({ data: { symbol: 'TSLA', name: 'Tesla, Inc.', type: 'stock' } }),
-    prisma.asset.create({ data: { symbol: 'NVDA', name: 'NVIDIA Corporation', type: 'stock' } }),
-    prisma.asset.create({ data: { symbol: 'BTC/USD', name: 'Bitcoin / US Dollar', type: 'crypto' } }),
-    prisma.asset.create({ data: { symbol: 'ETH/USD', name: 'Ethereum / US Dollar', type: 'crypto' } }),
-    prisma.asset.create({ data: { symbol: 'EUR/USD', name: 'Euro / US Dollar', type: 'forex' } })
+  const [sber, gazp, lkoh, ofz26238, ofz26243, ofz26248] = await Promise.all([
+    prisma.asset.create({ data: { symbol: 'SBER', name: 'Сбербанк ао', type: 'stock' } }),
+    prisma.asset.create({ data: { symbol: 'GAZP', name: 'Газпром', type: 'stock' } }),
+    prisma.asset.create({ data: { symbol: 'LKOH', name: 'ЛУКОЙЛ', type: 'stock' } }),
+    prisma.asset.create({ data: { symbol: 'SU26238RMFS4', name: 'ОФЗ 26238', type: 'bond' } }),
+    prisma.asset.create({ data: { symbol: 'SU26243RMFS4', name: 'ОФЗ 26243', type: 'bond' } }),
+    prisma.asset.create({ data: { symbol: 'SU26248RMFS3', name: 'ОФЗ 26248', type: 'bond' } })
   ]);
 
   const [adminDemo, teenDemo, youngDemo, adultDemo] = await Promise.all([
-    prisma.demoAccount.create({ data: { userId: admin.id, balance: 100000, initialBalance: 100000, currency: 'USD' } }),
-    prisma.demoAccount.create({ data: { userId: teenUser.id, balance: 100000, initialBalance: 100000, currency: 'USD' } }),
-    prisma.demoAccount.create({ data: { userId: youngUser.id, balance: 94783.5, initialBalance: 100000, currency: 'USD' } }),
-    prisma.demoAccount.create({ data: { userId: adultUser.id, balance: 100000, initialBalance: 100000, currency: 'USD' } })
+    prisma.demoAccount.create({ data: { userId: admin.id, balance: 1000000, initialBalance: 1000000, currency: 'RUB' } }),
+    prisma.demoAccount.create({ data: { userId: teenUser.id, balance: 1000000, initialBalance: 1000000, currency: 'RUB' } }),
+    prisma.demoAccount.create({ data: { userId: youngUser.id, balance: 934250, initialBalance: 1000000, currency: 'RUB' } }),
+    prisma.demoAccount.create({ data: { userId: adultUser.id, balance: 1000000, initialBalance: 1000000, currency: 'RUB' } })
   ]);
 
   await prisma.position.createMany({
     data: [
-      { accountId: youngDemo.id, assetId: aapl.id, quantity: 12, averagePrice: 198.4 },
-      { accountId: youngDemo.id, assetId: btc.id, quantity: 0.08, averagePrice: 65520 },
-      { accountId: youngDemo.id, assetId: eurusd.id, quantity: 1500, averagePrice: 1.084 }
+      { accountId: youngDemo.id, assetId: sber.id, quantity: 120, averagePrice: 302.4 },
+      { accountId: youngDemo.id, assetId: lkoh.id, quantity: 6, averagePrice: 7180 },
+      { accountId: youngDemo.id, assetId: ofz26243.id, quantity: 15, averagePrice: 640.2 }
     ]
   });
 
   await prisma.trade.createMany({
     data: [
-      { accountId: youngDemo.id, assetId: aapl.id, side: 'BUY', quantity: 12, price: 198.4, total: 2380.8, realizedPnl: 0 },
-      { accountId: youngDemo.id, assetId: btc.id, side: 'BUY', quantity: 0.08, price: 65520, total: 5241.6, realizedPnl: 0 },
-      { accountId: youngDemo.id, assetId: eurusd.id, side: 'BUY', quantity: 1500, price: 1.084, total: 1626, realizedPnl: 0 },
-      { accountId: youngDemo.id, assetId: tsla.id, side: 'BUY', quantity: 6, price: 171.5, total: 1029, realizedPnl: 0 },
-      { accountId: youngDemo.id, assetId: tsla.id, side: 'SELL', quantity: 2, price: 176.2, total: 352.4, realizedPnl: 9.4 }
+      { accountId: youngDemo.id, assetId: sber.id, side: 'BUY', quantity: 120, price: 302.4, total: 36288, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: lkoh.id, side: 'BUY', quantity: 6, price: 7180, total: 43080, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: ofz26243.id, side: 'BUY', quantity: 15, price: 640.2, total: 9603, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: gazp.id, side: 'BUY', quantity: 80, price: 164.8, total: 13184, realizedPnl: 0 },
+      { accountId: youngDemo.id, assetId: gazp.id, side: 'SELL', quantity: 20, price: 169.1, total: 3382, realizedPnl: 86 }
     ]
   });
 

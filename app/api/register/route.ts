@@ -43,7 +43,7 @@ export async function POST(request: Request) {
           userId: user.id,
           balance: initialBalance,
           initialBalance,
-          currency: 'USD'
+          currency: 'RUB'
         }
       });
     });

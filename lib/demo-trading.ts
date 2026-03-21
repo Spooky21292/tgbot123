@@ -30,8 +30,8 @@ function createTradingUserNotFoundError() {
 }
 
 export function getDemoStartingBalance() {
-  const raw = Number(process.env.DEMO_TRADING_START_BALANCE ?? '100000');
-  return Number.isFinite(raw) && raw > 0 ? raw : 100000;
+  const raw = Number(process.env.DEMO_TRADING_START_BALANCE ?? '1000000');
+  return Number.isFinite(raw) && raw > 0 ? raw : 1000000;
 }
 
 export async function ensureDemoAccount(userId: string) {
@@ -45,7 +45,7 @@ export async function ensureDemoAccount(userId: string) {
   const existing = await prisma.demoAccount.findUnique({ where: { userId } });
   if (existing) return existing;
   return prisma.demoAccount.create({
-    data: { userId, balance: initialBalance, initialBalance, currency: 'USD' }
+    data: { userId, balance: initialBalance, initialBalance, currency: 'RUB' }
   });
 }
 

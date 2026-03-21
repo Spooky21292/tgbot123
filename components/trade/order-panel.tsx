@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { getCurrencySymbol } from '@/lib/market-data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export function OrderPanel({ symbol, price, availableBalance, ownedQuantity }: { symbol: string; price: number; availableBalance: number; ownedQuantity: number }) {
   const [livePrice, setLivePrice] = useState(price);
+  const currencySymbol = getCurrencySymbol(symbol);
   const router = useRouter();
   const [quantity, setQuantity] = useState('1');
   const [pending, startTransition] = useTransition();
@@ -64,11 +66,11 @@ export function OrderPanel({ symbol, price, availableBalance, ownedQuantity }: {
         <div className="rounded-xl border border-border/80 bg-muted/30 p-4 text-sm">
           <div className="flex items-center justify-between gap-3">
             <span className="text-muted-foreground">Текущая цена</span>
-            <span className="font-medium text-foreground">${livePrice.toFixed(symbol === 'EUR/USD' ? 4 : 2)}</span>
+            <span className="font-medium text-foreground">{livePrice.toFixed(2)} {currencySymbol}</span>
           </div>
           <div className="mt-2 flex items-center justify-between gap-3">
             <span className="text-muted-foreground">Доступный баланс</span>
-            <span className="font-medium text-foreground">${availableBalance.toFixed(2)}</span>
+            <span className="font-medium text-foreground">{availableBalance.toFixed(2)} {currencySymbol}</span>
           </div>
           <div className="mt-2 flex items-center justify-between gap-3">
             <span className="text-muted-foreground">Ваш объём</span>
@@ -78,8 +80,8 @@ export function OrderPanel({ symbol, price, availableBalance, ownedQuantity }: {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-foreground">Количество</label>
-          <Input type="number" min="0" step={symbol.includes('USD') ? '0.0001' : '0.01'} value={quantity} onChange={(event) => setQuantity(event.target.value)} />
-          <p className="mt-2 text-sm text-muted-foreground">Оценка сделки: ${estimatedTotal.toFixed(2)}</p>
+          <Input type="number" min="0" step="1" value={quantity} onChange={(event) => setQuantity(event.target.value)} />
+          <p className="mt-2 text-sm text-muted-foreground">Оценка сделки: {estimatedTotal.toFixed(2)} {currencySymbol}</p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { MarketCandle } from '@/lib/market-data';
+import { getCurrencySymbol, type MarketCandle } from '@/lib/market-data';
 
 type ChartRange = '1D' | '1W' | '1M';
 
@@ -83,7 +83,8 @@ export function PriceChart({
   const paddingTop = 18;
   const paddingBottom = 36;
   const paddingX = 56;
-  const precision = symbol === 'EUR/USD' ? 4 : 2;
+  const precision = 2;
+  const currencySymbol = getCurrencySymbol(symbol);
   const highs = visibleCandles.map((item) => item.high);
   const lows = visibleCandles.map((item) => item.low);
   const min = Math.min(...lows);
@@ -112,9 +113,9 @@ export function PriceChart({
         <div>
           <p className="text-sm font-medium text-foreground">График цены</p>
           <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
-            <p className="text-3xl font-semibold tracking-tight text-foreground">${formatPrice(latest.close, precision)}</p>
+            <p className="text-3xl font-semibold tracking-tight text-foreground">{formatPrice(latest.close, precision)} {currencySymbol}</p>
             <p className={cn('text-sm font-medium', lastDelta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-              {lastDelta >= 0 ? '+' : '-'}${formatPrice(Math.abs(lastDelta), precision)} ({lastDeltaPercent >= 0 ? '+' : ''}{lastDeltaPercent.toFixed(2)}%)
+              {lastDelta >= 0 ? '+' : '-'}{formatPrice(Math.abs(lastDelta), precision)} {currencySymbol} ({lastDeltaPercent >= 0 ? '+' : ''}{lastDeltaPercent.toFixed(2)}%)
             </p>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">

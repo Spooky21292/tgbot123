@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { MarketQuote } from '@/lib/market-data';
+import { getCurrencySymbol, type MarketQuote } from '@/lib/market-data';
 
 type Props = {
   symbol: string;
@@ -10,8 +10,8 @@ type Props = {
 };
 
 function formatPrice(symbol: string, price: number) {
-  const precision = symbol === 'EUR/USD' ? 4 : 2;
-  return price.toFixed(precision);
+  const precision = 2;
+  return `${price.toFixed(precision)} ${getCurrencySymbol(symbol)}`;
 }
 
 export function LiveAssetPrice({ symbol, initialQuote }: Props) {
@@ -49,7 +49,7 @@ export function LiveAssetPrice({ symbol, initialQuote }: Props) {
   return (
     <div className="rounded-2xl border border-border/80 bg-card px-5 py-4">
       <p className="text-sm text-muted-foreground">Текущая цена</p>
-      <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">${formatPrice(symbol, quote.price)}</p>
+      <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">{formatPrice(symbol, quote.price)}</p>
       <p className={cn('mt-1 text-sm', quote.changePercent >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
         {quote.changePercent >= 0 ? '+' : ''}{quote.changePercent.toFixed(2)}% за сессию
       </p>

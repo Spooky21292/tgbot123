@@ -3,11 +3,12 @@ import { getServerSession } from 'next-auth';
 import { notFound, redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { getAssetTradingView, getDemoTradingErrorMessage } from '@/lib/demo-trading';
-import { getMarketCandles } from '@/lib/market-data';
+import { getCurrencySymbol, getMarketCandles } from '@/lib/market-data';
 import { Container } from '@/components/layout/container';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { BondIncomeCard } from '@/components/trade/bond-income-card';
 import { LiveAssetPrice } from '@/components/trade/live-asset-price';
 import { PriceChart } from '@/components/trade/price-chart';
 import { OrderPanel } from '@/components/trade/order-panel';
@@ -21,6 +22,7 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
     const view = await getAssetTradingView(session.user.id, symbol);
     if (!view) notFound();
     const candles = await getMarketCandles(view.asset.symbol);
+    const currencySymbol = getCurrencySymbol(view.asset.symbol);
 
     return (
       <Container className="py-10 sm:py-12">
@@ -51,20 +53,22 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Средняя цена</p>
-                  <p className="mt-2 text-xl font-semibold text-foreground">${view.position?.averagePrice?.toFixed(2) ?? '0.00'}</p>
+                  <p className="mt-2 text-xl font-semibold text-foreground">{view.position?.averagePrice ? `${view.position.averagePrice.toFixed(2)} ${currencySymbol}` : `0.00 ${currencySymbol}`}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Рыночная стоимость</p>
-                  <p className="mt-2 text-xl font-semibold text-foreground">${view.marketValue.toFixed(2)}</p>
+                  <p className="mt-2 text-xl font-semibold text-foreground">{view.marketValue.toFixed(2)} {currencySymbol}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Нереализованный PnL</p>
                   <p className={view.unrealizedPnl >= 0 ? 'mt-2 text-xl font-semibold text-emerald-600 dark:text-emerald-400' : 'mt-2 text-xl font-semibold text-rose-600 dark:text-rose-400'}>
-                    {view.unrealizedPnl >= 0 ? '+' : ''}${view.unrealizedPnl.toFixed(2)}
+                    {view.unrealizedPnl >= 0 ? '+' : ''}{view.unrealizedPnl.toFixed(2)} {currencySymbol}
                   </p>
                 </div>
               </CardContent>
             </Card>
+
+            {view.asset.type === 'bond' ? <BondIncomeCard symbol={view.asset.symbol} ownedQuantity={view.position?.quantity ?? 0} /> : null}
 
             <Card>
               <CardHeader>
@@ -77,8 +81,8 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
                     <p className="font-medium text-foreground">{trade.side}</p>
                     <div className="grid gap-1 text-muted-foreground sm:grid-cols-3 md:min-w-[360px]">
                       <span>Qty: {trade.quantity.toFixed(4)}</span>
-                      <span>Цена: ${trade.price.toFixed(2)}</span>
-                      <span>Итого: ${trade.total.toFixed(2)}</span>
+                      <span>Цена: {trade.price.toFixed(2)} {currencySymbol}</span>
+                      <span>Итого: {trade.total.toFixed(2)} {currencySymbol}</span>
                     </div>
                     <p className="text-muted-foreground">{new Date(trade.createdAt).toLocaleString('ru-RU')}</p>
                   </div>
