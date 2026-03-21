@@ -30,24 +30,24 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
         <div className="max-w-2xl">
           <h1 className="text-4xl font-semibold tracking-tight text-foreground">Каталог курсов</h1>
           <p className="mt-3 text-base leading-7 text-muted-foreground">
-            Спокойные образовательные программы по бюджету, привычкам, безопасности и долгосрочным решениям.
+            Большие структурированные программы по бюджету, безопасности, карьерным деньгам, семейным финансам и долгосрочным решениям.
           </p>
         </div>
-        <form className="grid gap-3 rounded-2xl border border-border/80 bg-card p-4 sm:grid-cols-4">
-          <Input name="search" placeholder="Поиск по курсам" defaultValue={searchParams?.search} />
-          <Select name="ageGroup" defaultValue={searchParams?.ageGroup ?? ''}>
+        <form className="grid w-full gap-3 rounded-2xl border border-border/80 bg-card p-4 sm:grid-cols-[minmax(240px,1.5fr)_minmax(170px,1fr)_minmax(170px,1fr)_minmax(150px,auto)] lg:max-w-4xl">
+          <Input name="search" placeholder="Поиск по курсам" defaultValue={searchParams?.search} className="min-w-[240px]" />
+          <Select name="ageGroup" defaultValue={searchParams?.ageGroup ?? ''} className="min-w-[170px]">
             <option value="">Все возрасты</option>
             <option value="14-17">14–17</option>
             <option value="18-25">18–25</option>
             <option value="26+">26+</option>
           </Select>
-          <Select name="level" defaultValue={searchParams?.level ?? ''}>
+          <Select name="level" defaultValue={searchParams?.level ?? ''} className="min-w-[170px]">
             <option value="">Все уровни</option>
             <option value="beginner">Старт</option>
             <option value="intermediate">Практика</option>
             <option value="advanced">Продвинутый</option>
           </Select>
-          <Button type="submit">Применить</Button>
+          <Button type="submit" className="w-full min-w-[150px]">Применить</Button>
         </form>
       </div>
 

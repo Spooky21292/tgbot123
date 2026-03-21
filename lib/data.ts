@@ -40,20 +40,32 @@ export async function getCourses(filters?: { ageGroup?: string; level?: string; 
   return courses;
 }
 
-export async function getBlogPosts(search?: string) {
+export async function getBlogPosts(filters?: { search?: string; category?: string }) {
   return db.article.findMany({
     where: {
       isPublished: true,
-      ...(search
+      ...(filters?.category ? { category: filters.category } : {}),
+      ...(filters?.search
         ? {
             OR: [
-              { title: { contains: search } },
-              { excerpt: { contains: search } },
-              { category: { contains: search } }
+              { title: { contains: filters.search } },
+              { excerpt: { contains: filters.search } },
+              { category: { contains: filters.search } }
             ]
           }
         : {})
     },
     orderBy: { createdAt: 'desc' }
   });
+}
+
+export async function getBlogCategories() {
+  const categories = await db.article.findMany({
+    where: { isPublished: true },
+    select: { category: true },
+    distinct: ['category'],
+    orderBy: { category: 'asc' }
+  });
+
+  return categories.map((item) => item.category);
 }
