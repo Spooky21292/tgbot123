@@ -37,7 +37,7 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
           <LiveAssetPrice symbol={view.asset.symbol} initialQuote={view.quote} />
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+        <div className="mt-8 grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
           <div className="space-y-6">
             <PriceChart symbol={view.asset.symbol} candles={candles} initialQuote={view.quote} />
 

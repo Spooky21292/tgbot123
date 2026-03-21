@@ -14,6 +14,7 @@ type TradePageSearchParams = {
   search?: string;
   type?: string;
   page?: string;
+  portfolioPage?: string;
 };
 
 function buildTradeQuery(searchParams: TradePageSearchParams | undefined, overrides: Partial<TradePageSearchParams> = {}) {
@@ -21,38 +22,42 @@ function buildTradeQuery(searchParams: TradePageSearchParams | undefined, overri
   const nextSearch = overrides.search ?? searchParams?.search;
   const nextType = overrides.type ?? searchParams?.type;
   const nextPage = overrides.page ?? searchParams?.page;
+  const nextPortfolioPage = overrides.portfolioPage ?? searchParams?.portfolioPage;
 
   if (nextSearch) params.set('search', nextSearch);
   if (nextType && nextType !== 'all') params.set('type', nextType);
   if (nextPage && nextPage !== '1') params.set('page', nextPage);
+  if (nextPortfolioPage && nextPortfolioPage !== '1') params.set('portfolioPage', nextPortfolioPage);
 
   const query = params.toString();
   return query ? `/trade?${query}` : '/trade';
 }
 
-function WatchlistPagination({
+function PaginationControls({
   page,
   pageCount,
   searchParams,
-  assetType
+  overrides,
+  className = 'mt-4'
 }: {
   page: number;
   pageCount: number;
   searchParams?: TradePageSearchParams;
-  assetType: string;
+  overrides: Partial<TradePageSearchParams>;
+  className?: string;
 }) {
   return (
-    <div className="mt-4 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+    <div className={`${className} flex items-center justify-between gap-3 text-sm text-muted-foreground`}>
       <span>Страница {page} из {pageCount}</span>
       <div className="flex items-center gap-2">
         <Link
-          href={buildTradeQuery(searchParams, { type: assetType, page: String(Math.max(1, page - 1)) })}
+          href={buildTradeQuery(searchParams, { ...overrides, page: overrides.page, portfolioPage: overrides.portfolioPage, ...(overrides.page !== undefined ? { page: String(Math.max(1, page - 1)) } : {}), ...(overrides.portfolioPage !== undefined ? { portfolioPage: String(Math.max(1, page - 1)) } : {}) })}
           className={`rounded-lg border px-3 py-2 ${page <= 1 ? 'pointer-events-none opacity-50' : ''}`}
         >
           Назад
         </Link>
         <Link
-          href={buildTradeQuery(searchParams, { type: assetType, page: String(Math.min(pageCount, page + 1)) })}
+          href={buildTradeQuery(searchParams, { ...overrides, page: overrides.page, portfolioPage: overrides.portfolioPage, ...(overrides.page !== undefined ? { page: String(Math.min(pageCount, page + 1)) } : {}), ...(overrides.portfolioPage !== undefined ? { portfolioPage: String(Math.min(pageCount, page + 1)) } : {}) })}
           className={`rounded-lg border px-3 py-2 ${page >= pageCount ? 'pointer-events-none opacity-50' : ''}`}
         >
           Вперёд
@@ -68,11 +73,18 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
 
   try {
     const currentPage = Number(searchParams?.page ?? '1');
-    const data = await getTradingDashboard(session.user.id, searchParams?.search, searchParams?.type, currentPage);
+    const currentPortfolioPage = Number(searchParams?.portfolioPage ?? '1');
+    const data = await getTradingDashboard(
+      session.user.id,
+      searchParams?.search,
+      searchParams?.type,
+      currentPage,
+      currentPortfolioPage
+    );
 
     return (
       <Container className="py-10 sm:py-12">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
             <Badge>Демо-счёт</Badge>
             <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground">Учебный торговый симулятор</h1>
@@ -80,7 +92,7 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
               Только виртуальный баланс, российские акции и облигации, рыночные данные и образовательная практика. Никаких депозитов, вывода средств и реального исполнения.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-row gap-3 self-start lg:self-center">
             <ResetDemoAccountButton />
             <Button variant="secondary" asChild>
               <Link href="/pricing">Доступ к платформе</Link>
@@ -105,20 +117,20 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
           ))}
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="mt-8 grid gap-5 xl:grid-cols-[0.95fr_0.85fr]">
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /> Портфель</CardTitle>
               <CardDescription>Открытые позиции и текущая оценка по рынку.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-0">
               {data.positions.length ? data.positions.map(({ position, quote, marketValue, unrealizedPnl }) => (
                 <div key={position.id} className="flex flex-col gap-3 rounded-xl border border-border/80 bg-muted/20 p-4 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="font-medium text-foreground">{position.asset.symbol}</p>
                     <p className="text-sm text-muted-foreground">{position.asset.name}</p>
                   </div>
-                  <div className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2 md:min-w-[340px]">
+                  <div className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2 md:min-w-[280px] xl:min-w-[320px]">
                     <span>Объём: {position.quantity.toFixed(4)}</span>
                     <span>Средняя: {position.averagePrice.toFixed(2)} ₽</span>
                     <span>Текущая: {quote.price.toFixed(2)} ₽</span>
@@ -134,15 +146,22 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
                   </div>
                 </div>
               )) : <p className="text-sm leading-6 text-muted-foreground">Пока нет открытых позиций. Выберите актив из watchlist и сделайте первую демо-сделку.</p>}
+
+              <PaginationControls
+                page={data.positionsPagination.page}
+                pageCount={data.positionsPagination.pageCount}
+                searchParams={searchParams}
+                overrides={{ portfolioPage: String(data.positionsPagination.page) }}
+              />
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2"><ArrowRightLeft className="h-4 w-4 text-primary" /> Watchlist</CardTitle>
-              <CardDescription>Небольшой набор активов для спокойной учебной практики.</CardDescription>
+              <CardDescription>Набор активов для спокойной учебной практики.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <form className="mb-4 space-y-4">
                 <input
                   name="search"
@@ -152,6 +171,7 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
                 />
                 {data.watchlistPagination.assetType !== 'all' ? <input type="hidden" name="type" value={data.watchlistPagination.assetType} /> : null}
                 <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="portfolioPage" value={searchParams?.portfolioPage ?? '1'} />
               </form>
 
               <div className="mb-4 flex flex-wrap gap-2">
@@ -187,17 +207,17 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
                 )) : <p className="text-sm leading-6 text-muted-foreground">По вашему фильтру активы не найдены.</p>}
               </div>
 
-              <WatchlistPagination
+              <PaginationControls
                 page={data.watchlistPagination.page}
                 pageCount={data.watchlistPagination.pageCount}
                 searchParams={searchParams}
-                assetType={data.watchlistPagination.assetType}
+                overrides={{ page: String(data.watchlistPagination.page), type: data.watchlistPagination.assetType }}
               />
             </CardContent>
           </Card>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           <Card>
             <CardHeader>
               <CardTitle>Подсказка</CardTitle>

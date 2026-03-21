@@ -139,8 +139,10 @@ export function PriceChart({
   const candleSlot = plotWidth / visibleCandles.length;
   const candleWidth = Math.max(Math.min(candleSlot * 0.58, 18), 4);
   const latest = quote ?? { price: visibleCandles[visibleCandles.length - 1].close, change: 0, changePercent: 0 };
-  const lastDelta = typeof latest.change === 'number' ? latest.change : 0;
-  const lastDeltaPercent = typeof latest.changePercent === 'number' ? latest.changePercent : 0;
+  const rangeStart = visibleCandles[0]?.open ?? visibleCandles[0]?.close ?? latest.price;
+  const lastDelta = latest.price - rangeStart;
+  const lastDeltaPercent = rangeStart ? (lastDelta / rangeStart) * 100 : 0;
+  const periodLabel = range === '1D' ? 'за день' : range === '1W' ? 'за неделю' : 'за месяц';
 
   const yForPrice = (price: number) => paddingTop + ((max - price) / rangeValue) * plotHeight;
 
@@ -158,7 +160,7 @@ export function PriceChart({
           <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
             <p className="text-3xl font-semibold tracking-tight text-foreground">{formatPrice(latest.price, precision)} {currencySymbol}</p>
             <p className={cn('text-sm font-medium', lastDelta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
-              {lastDelta >= 0 ? '+' : '-'}{formatPrice(Math.abs(lastDelta), precision)} {currencySymbol} ({lastDeltaPercent >= 0 ? '+' : ''}{lastDeltaPercent.toFixed(2)}%)
+              {lastDelta >= 0 ? '+' : '-'}{formatPrice(Math.abs(lastDelta), precision)} {currencySymbol} ({lastDeltaPercent >= 0 ? '+' : ''}{lastDeltaPercent.toFixed(2)}%) {periodLabel}
             </p>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">

@@ -49,13 +49,15 @@ export async function ensureDemoAccount(userId: string) {
   });
 }
 
-export async function getTradingDashboard(userId: string, search?: string, assetType?: string, page = 1) {
+export async function getTradingDashboard(userId: string, search?: string, assetType?: string, page = 1, portfolioPage = 1) {
   const prisma = getTradingModels();
   if (!prisma) throw createTradingNotReadyError();
 
   const account = await ensureDemoAccount(userId);
   const watchlistPageSize = 10;
+  const portfolioPageSize = 8;
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const safePortfolioPage = Number.isFinite(portfolioPage) && portfolioPage > 0 ? Math.floor(portfolioPage) : 1;
   const assetFilter = assetType && ['stock', 'bond'].includes(assetType) ? assetType : undefined;
   const assetWhere = {
     isActive: true,
@@ -63,8 +65,15 @@ export async function getTradingDashboard(userId: string, search?: string, asset
     ...(search ? { OR: [{ symbol: { contains: search } }, { name: { contains: search } }] } : {})
   };
 
-  const [positions, trades, assetPairs, watchlistCount] = await Promise.all([
-    prisma.position.findMany({ where: { accountId: account.id }, include: { asset: true }, orderBy: { updatedAt: 'desc' } }),
+  const [positions, allPositions, trades, assetPairs, watchlistCount, positionsCount] = await Promise.all([
+    prisma.position.findMany({
+      where: { accountId: account.id },
+      include: { asset: true },
+      orderBy: { updatedAt: 'desc' },
+      skip: (safePortfolioPage - 1) * portfolioPageSize,
+      take: portfolioPageSize
+    }),
+    prisma.position.findMany({ where: { accountId: account.id }, include: { asset: true } }),
     prisma.trade.findMany({ where: { accountId: account.id }, include: { asset: true }, orderBy: { createdAt: 'desc' }, take: 12 }),
     prisma.asset.findMany({
       where: assetWhere,
@@ -72,23 +81,27 @@ export async function getTradingDashboard(userId: string, search?: string, asset
       skip: (safePage - 1) * watchlistPageSize,
       take: watchlistPageSize
     }),
-    prisma.asset.count({ where: assetWhere })
+    prisma.asset.count({ where: assetWhere }),
+    prisma.position.count({ where: { accountId: account.id } })
   ]);
 
-  const uniqueSymbols = Array.from(new Set([...positions.map((position: any) => position.asset.symbol), ...assetPairs.map((asset: any) => asset.symbol)]));
+  const uniqueSymbols = Array.from(new Set([...allPositions.map((position: any) => position.asset.symbol), ...assetPairs.map((asset: any) => asset.symbol)]));
   const quotes = Object.fromEntries(await Promise.all(uniqueSymbols.map(async (symbol) => [symbol, await getMarketQuote(symbol)])));
 
-  const enrichedPositions = positions.map((position: any) => {
+  const enrichPosition = (position: any) => {
     const quote = quotes[position.asset.symbol];
     const marketValue = position.quantity * quote.price;
     const costBasis = position.quantity * position.averagePrice;
     const unrealizedPnl = marketValue - costBasis;
     return { position, quote, marketValue, costBasis, unrealizedPnl };
-  });
+  };
 
-  const investedAmount = enrichedPositions.reduce((sum, item) => sum + item.costBasis, 0);
-  const portfolioValue = enrichedPositions.reduce((sum, item) => sum + item.marketValue, 0);
-  const unrealizedPnl = enrichedPositions.reduce((sum, item) => sum + item.unrealizedPnl, 0);
+  const enrichedPositions = positions.map(enrichPosition);
+  const enrichedAllPositions = allPositions.map(enrichPosition);
+
+  const investedAmount = enrichedAllPositions.reduce((sum, item) => sum + item.costBasis, 0);
+  const portfolioValue = enrichedAllPositions.reduce((sum, item) => sum + item.marketValue, 0);
+  const unrealizedPnl = enrichedAllPositions.reduce((sum, item) => sum + item.unrealizedPnl, 0);
   const equity = account.balance + portfolioValue;
   const totalPnl = equity - account.initialBalance;
   const totalReturn = account.initialBalance ? (totalPnl / account.initialBalance) * 100 : 0;
@@ -104,6 +117,12 @@ export async function getTradingDashboard(userId: string, search?: string, asset
       total: watchlistCount,
       pageCount: Math.max(1, Math.ceil(watchlistCount / watchlistPageSize)),
       assetType: assetFilter ?? 'all'
+    },
+    positionsPagination: {
+      page: safePortfolioPage,
+      pageSize: portfolioPageSize,
+      total: positionsCount,
+      pageCount: Math.max(1, Math.ceil(positionsCount / portfolioPageSize))
     },
     positions: enrichedPositions,
     trades,
