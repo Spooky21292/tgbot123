@@ -14,9 +14,11 @@ export default async function WebinarsPage() {
   return (
     <Container className="py-10 sm:py-12">
       <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Вебинары' }]} />
-      <div className="max-w-2xl">
-        <h1 className="text-4xl font-semibold tracking-tight text-foreground">Предстоящие вебинары</h1>
-        <p className="mt-3 text-base leading-7 text-muted-foreground">Спокойные разборы тем, которые помогают принимать более уверенные финансовые решения.</p>
+      <div className="max-w-3xl">
+        <h1 className="text-4xl font-semibold tracking-tight text-foreground">Вебинары и записи</h1>
+        <p className="mt-3 text-base leading-7 text-muted-foreground">
+          Все вебинары входят в доступ к платформе: их можно смотреть вживую, а после эфира материалы остаются в записи.
+        </p>
       </div>
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {webinars.map((webinar) => (
@@ -27,9 +29,10 @@ export default async function WebinarsPage() {
             </CardHeader>
             <CardContent>
               <p className="mb-2 text-sm text-muted-foreground">Спикер: {webinar.speaker}</p>
-              <p className="mb-4 text-sm text-muted-foreground">{new Date(webinar.date).toLocaleString('ru-RU')}</p>
+              <p className="mb-2 text-sm text-muted-foreground">{new Date(webinar.date).toLocaleString('ru-RU')}</p>
+              <p className="mb-4 text-sm text-muted-foreground">Входит в подписку и остаётся в библиотеке записей.</p>
               <Button asChild>
-                <Link href={`/webinars/${webinar.id}`}>Записаться</Link>
+                <Link href={`/webinars/${webinar.id}`}>Открыть вебинар</Link>
               </Button>
             </CardContent>
           </Card>

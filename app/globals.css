@@ -3,39 +3,39 @@
 @tailwind utilities;
 
 :root {
-  --background: 210 20% 98%;
-  --foreground: 222 24% 14%;
+  --background: 216 38% 97%;
+  --foreground: 222 32% 14%;
   --card: 0 0% 100%;
-  --card-foreground: 222 24% 14%;
-  --primary: 222 47% 24%;
+  --card-foreground: 222 32% 14%;
+  --primary: 220 62% 27%;
   --primary-foreground: 210 40% 98%;
-  --secondary: 210 24% 96%;
-  --secondary-foreground: 222 24% 18%;
-  --muted: 210 20% 96%;
-  --muted-foreground: 215 14% 42%;
-  --accent: 222 47% 24%;
+  --secondary: 217 42% 95%;
+  --secondary-foreground: 222 30% 18%;
+  --muted: 218 34% 95%;
+  --muted-foreground: 217 17% 42%;
+  --accent: 220 62% 27%;
   --accent-foreground: 210 40% 98%;
-  --border: 214 18% 88%;
-  --input: 214 18% 88%;
-  --ring: 222 47% 24%;
+  --border: 217 28% 87%;
+  --input: 217 28% 87%;
+  --ring: 220 62% 27%;
 }
 
 .dark {
-  --background: 222 22% 8%;
-  --foreground: 210 20% 96%;
-  --card: 222 20% 10%;
-  --card-foreground: 210 20% 96%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222 24% 14%;
-  --secondary: 222 16% 15%;
-  --secondary-foreground: 210 20% 96%;
-  --muted: 222 16% 15%;
-  --muted-foreground: 214 14% 70%;
-  --accent: 210 40% 98%;
-  --accent-foreground: 222 24% 14%;
-  --border: 222 14% 18%;
-  --input: 222 14% 18%;
-  --ring: 210 40% 98%;
+  --background: 222 42% 10%;
+  --foreground: 210 24% 96%;
+  --card: 222 38% 13%;
+  --card-foreground: 210 24% 96%;
+  --primary: 213 72% 66%;
+  --primary-foreground: 222 44% 12%;
+  --secondary: 222 34% 17%;
+  --secondary-foreground: 210 24% 96%;
+  --muted: 222 30% 16%;
+  --muted-foreground: 214 18% 72%;
+  --accent: 213 72% 66%;
+  --accent-foreground: 222 44% 12%;
+  --border: 222 24% 22%;
+  --input: 222 24% 22%;
+  --ring: 213 72% 66%;
 }
 
 * {
@@ -48,7 +48,9 @@ html {
 
 body {
   @apply bg-background text-foreground antialiased;
-  background-image: radial-gradient(circle at top, rgba(15, 23, 42, 0.03), transparent 40%);
+  background-image:
+    radial-gradient(circle at top, rgba(30, 64, 175, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(219, 234, 254, 0.35) 0%, rgba(255, 255, 255, 0) 28%);
 }
 
 main {
@@ -60,7 +62,7 @@ main {
 }
 
 .prose-finance {
-  @apply space-y-6 text-[15px] leading-8 text-slate-600 dark:text-slate-300;
+  @apply space-y-6 text-[15px] leading-8 text-slate-700 dark:text-slate-300;
 }
 
 .prose-finance h1,
@@ -84,5 +86,5 @@ main {
 
 .prose-finance p,
 .prose-finance li {
-  @apply max-w-none text-slate-600 dark:text-slate-300;
+  @apply max-w-none text-slate-700 dark:text-slate-300;
 }
