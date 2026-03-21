@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { authOptions } from '@/lib/auth';
-import { executeDemoTrade, isDemoTradingReady } from '@/lib/demo-trading';
+import { executeDemoTrade, getDemoTradingErrorMessage, isDemoTradingReady } from '@/lib/demo-trading';
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +21,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: result.error }, { status: result.status });
     }
     return NextResponse.json({ ok: true, data: result.data });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'DEMO_TRADING_USER_NOT_FOUND') {
+      return NextResponse.json({ ok: false, error: getDemoTradingErrorMessage(error) }, { status: 401 });
+    }
+
     return NextResponse.json({ ok: false, error: 'Не удалось выполнить демо-сделку' }, { status: 500 });
   }
 }

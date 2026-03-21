@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { db } from '@/lib/db';
+import { getDemoStartingBalance } from '@/lib/demo-trading';
 import { registerSchema } from '@/lib/validations';
 
 export async function POST(request: Request) {
@@ -24,14 +25,27 @@ export async function POST(request: Request) {
     }
 
     const passwordHash = await bcrypt.hash(payload.data.password, 10);
-    await db.user.create({
-      data: {
-        name: payload.data.name,
-        email: payload.data.email,
-        ageGroup: payload.data.ageGroup,
-        passwordHash,
-        role: 'user'
-      }
+    const initialBalance = getDemoStartingBalance();
+
+    await db.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          name: payload.data.name,
+          email: payload.data.email,
+          ageGroup: payload.data.ageGroup,
+          passwordHash,
+          role: 'user'
+        }
+      });
+
+      await tx.demoAccount.create({
+        data: {
+          userId: user.id,
+          balance: initialBalance,
+          initialBalance,
+          currency: 'USD'
+        }
+      });
     });
 
     return NextResponse.json({ ok: true });

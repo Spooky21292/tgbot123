@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import { getTradingDashboard } from '@/lib/demo-trading';
+import { getDemoTradingErrorMessage, getTradingDashboard } from '@/lib/demo-trading';
 import { Container } from '@/components/layout/container';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -166,14 +166,14 @@ export default async function TradePage({ searchParams }: { searchParams?: { sea
         <Card>
           <CardHeader>
             <Badge>Демо-счёт</Badge>
-            <CardTitle>Торговый модуль ещё не инициализирован</CardTitle>
+            <CardTitle>Торговый модуль временно недоступен</CardTitle>
             <CardDescription>
-              Скорее всего Prisma Client ещё не обновлён под новые модели demo trading.
+              Проверьте состояние Prisma Client, базы данных и текущей пользовательской сессии.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
-            <p>Выполните `npm run db:generate`, затем `npm run db:push` и `npm run db:seed`, после чего откройте страницу снова.</p>
-            <p>Техническая причина: {error instanceof Error ? error.message : 'неизвестная ошибка'}.</p>
+            <p>{getDemoTradingErrorMessage(error)}</p>
+            <p>Если база пересоздавалась или выполнялся seed, полностью выйдите из аккаунта и войдите снова, чтобы обновить session user id.</p>
           </CardContent>
         </Card>
       </Container>

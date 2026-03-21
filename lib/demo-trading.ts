@@ -25,6 +25,10 @@ function createTradingNotReadyError() {
   return new Error('DEMO_TRADING_NOT_READY');
 }
 
+function createTradingUserNotFoundError() {
+  return new Error('DEMO_TRADING_USER_NOT_FOUND');
+}
+
 export function getDemoStartingBalance() {
   const raw = Number(process.env.DEMO_TRADING_START_BALANCE ?? '100000');
   return Number.isFinite(raw) && raw > 0 ? raw : 100000;
@@ -33,6 +37,9 @@ export function getDemoStartingBalance() {
 export async function ensureDemoAccount(userId: string) {
   const prisma = getTradingModels();
   if (!prisma) throw createTradingNotReadyError();
+
+  const user = await db.user.findUnique({ where: { id: userId }, select: { id: true } });
+  if (!user) throw createTradingUserNotFoundError();
 
   const initialBalance = getDemoStartingBalance();
   const existing = await prisma.demoAccount.findUnique({ where: { userId } });
@@ -178,4 +185,18 @@ export async function resetDemoAccount(userId: string) {
     prisma.demoAccount.update({ where: { id: account.id }, data: { balance: initialBalance, initialBalance } })
   ]);
   return prisma.demoAccount.findUniqueOrThrow({ where: { id: account.id } });
+}
+
+export function getDemoTradingErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : '';
+
+  if (message === 'DEMO_TRADING_NOT_READY') {
+    return 'Торговые модели Prisma ещё не инициализированы. Выполните npm run db:generate, затем npm run db:push и npm run db:seed.';
+  }
+
+  if (message === 'DEMO_TRADING_USER_NOT_FOUND') {
+    return 'Текущая сессия ссылается на пользователя, которого уже нет в базе данных. Обычно это происходит после db push/db seed или пересоздания базы. Выйдите из аккаунта и войдите снова; если аккаунт тестовый, используйте seeded-пользователя или зарегистрируйтесь заново.';
+  }
+
+  return message || 'Неизвестная ошибка';
 }

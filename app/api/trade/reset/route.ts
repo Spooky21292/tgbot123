@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { authOptions } from '@/lib/auth';
-import { isDemoTradingReady, resetDemoAccount } from '@/lib/demo-trading';
+import { getDemoTradingErrorMessage, isDemoTradingReady, resetDemoAccount } from '@/lib/demo-trading';
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +18,11 @@ export async function POST(request: Request) {
     }
     const account = await resetDemoAccount(session.user.id);
     return NextResponse.json({ ok: true, data: account });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'DEMO_TRADING_USER_NOT_FOUND') {
+      return NextResponse.json({ ok: false, error: getDemoTradingErrorMessage(error) }, { status: 401 });
+    }
+
     return NextResponse.json({ ok: false, error: 'Не удалось сбросить демо-счёт' }, { status: 500 });
   }
 }

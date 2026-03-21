@@ -2,7 +2,7 @@ import { TrendingUp } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import { notFound, redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
-import { getAssetTradingView } from '@/lib/demo-trading';
+import { getAssetTradingView, getDemoTradingErrorMessage } from '@/lib/demo-trading';
 import { getMarketCandles } from '@/lib/market-data';
 import { Container } from '@/components/layout/container';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
@@ -102,12 +102,12 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
         <Card>
           <CardHeader>
             <Badge>Демо-счёт</Badge>
-            <CardTitle>Торговый модуль ещё не инициализирован</CardTitle>
-            <CardDescription>Сначала обновите Prisma Client и базу данных под новые торговые модели.</CardDescription>
+            <CardTitle>Торговый модуль временно недоступен</CardTitle>
+            <CardDescription>Проблема связана либо с инициализацией Prisma, либо с устаревшей пользовательской сессией.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
-            <p>Выполните `npm run db:generate`, затем `npm run db:push` и `npm run db:seed`.</p>
-            <p>Техническая причина: {error instanceof Error ? error.message : 'неизвестная ошибка'}.</p>
+            <p>{getDemoTradingErrorMessage(error)}</p>
+            <p>Если вы недавно пересоздавали базу данных, обновите сессию: выйдите из аккаунта и войдите снова.</p>
           </CardContent>
         </Card>
       </Container>
