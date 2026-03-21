@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getServerSession } from 'next-auth';
 import { Container } from '@/components/layout/container';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,12 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { getCourses } from '@/lib/data';
+import { authOptions } from '@/lib/auth';
 import { ageGroupLabel, courseLevelLabel } from '@/lib/utils';
 
 export const metadata: Metadata = { title: 'Курсы', description: 'Каталог курсов по финансовой грамотности' };
 
 export default async function CoursesPage({ searchParams }: { searchParams?: { ageGroup?: string; level?: string; search?: string } }) {
-  const courses = await getCourses(searchParams);
+  const session = await getServerSession(authOptions);
+  const courses = await getCourses({ ...searchParams, preferredAgeGroup: session?.user?.ageGroup });
 
   return (
     <Container className="py-10 sm:py-12">

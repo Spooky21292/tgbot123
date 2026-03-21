@@ -19,7 +19,17 @@ const benefits = [
   }
 ];
 
-export function HomeSections() {
+export function HomeSections({
+  primaryHref,
+  primaryLabel,
+  secondaryHref,
+  secondaryLabel
+}: {
+  primaryHref: string;
+  primaryLabel: string;
+  secondaryHref: string;
+  secondaryLabel: string;
+}) {
   return (
     <>
       <section className="py-20 sm:py-24">
@@ -55,10 +65,10 @@ export function HomeSections() {
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Button asChild>
-                <Link href="/auth/register">Создать аккаунт</Link>
+                <Link href={primaryHref}>{primaryLabel}</Link>
               </Button>
               <Button variant="secondary" asChild>
-                <Link href="/courses">Посмотреть каталог</Link>
+                <Link href={secondaryHref}>{secondaryLabel}</Link>
               </Button>
             </div>
           </div>

@@ -10,7 +10,17 @@ const stats = [
   ['1 спокойная система', 'без перегруза и шума']
 ];
 
-export function HeroSection() {
+export function HeroSection({
+  primaryHref,
+  primaryLabel,
+  secondaryHref,
+  secondaryLabel
+}: {
+  primaryHref: string;
+  primaryLabel: string;
+  secondaryHref: string;
+  secondaryLabel: string;
+}) {
   return (
     <section className="border-b border-border/70 bg-background py-20 sm:py-24">
       <Container>
@@ -24,13 +34,13 @@ export function HeroSection() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button size="lg" asChild>
-              <Link href="/auth/register">
-                Начать обучение
+              <Link href={primaryHref}>
+                {primaryLabel}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="secondary" asChild>
-              <Link href="/courses">Посмотреть курсы</Link>
+              <Link href={secondaryHref}>{secondaryLabel}</Link>
             </Button>
           </div>
         </div>

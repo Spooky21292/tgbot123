@@ -7,15 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Container } from './container';
 import { ThemeToggle } from './theme-toggle';
 
-const links = [
-  ['Курсы', '/courses'],
-  ['Демо-трейд', '/trade'],
-  ['Блог', '/blog'],
-  ['Вебинары', '/webinars']
-];
-
 export function Navbar() {
   const { data: session } = useSession();
+  const links = [
+    ['Курсы', '/courses'],
+    ['Демо-трейд', session?.user ? '/trade' : '/auth/register'],
+    ['Блог', '/blog'],
+    ['Вебинары', '/webinars']
+  ] as const;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur">

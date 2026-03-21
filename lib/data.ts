@@ -10,8 +10,8 @@ export async function getHomePageData() {
   return { courses, webinars, articles, botFeatures };
 }
 
-export async function getCourses(filters?: { ageGroup?: string; level?: string; search?: string }) {
-  return db.course.findMany({
+export async function getCourses(filters?: { ageGroup?: string; level?: string; search?: string; preferredAgeGroup?: string }) {
+  const courses = await db.course.findMany({
     where: {
       isPublished: true,
       ...(filters?.ageGroup ? { ageGroup: filters.ageGroup as never } : {}),
@@ -28,6 +28,16 @@ export async function getCourses(filters?: { ageGroup?: string; level?: string; 
     include: { lessons: { orderBy: { order: 'asc' } } },
     orderBy: { createdAt: 'desc' }
   });
+
+  if (!filters?.ageGroup && filters?.preferredAgeGroup) {
+    return courses.sort((a, b) => {
+      const aScore = a.ageGroup === filters.preferredAgeGroup ? 1 : 0;
+      const bScore = b.ageGroup === filters.preferredAgeGroup ? 1 : 0;
+      return bScore - aScore;
+    });
+  }
+
+  return courses;
 }
 
 export async function getBlogPosts(search?: string) {
