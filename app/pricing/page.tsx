@@ -24,7 +24,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { p
       <div className="max-w-2xl">
         <h1 className="text-4xl font-semibold tracking-tight text-foreground">Тарифы</h1>
         <p className="mt-3 text-base leading-7 text-muted-foreground">
-          Выберите тариф и перейдите к оплате. Для тестовой активации используйте код <span className="font-semibold text-foreground">TESTPROMO</span> — он даёт 31 день доступа.
+          Выберите тариф и перейдите к оплате. После активации доступ появится в кабинете автоматически.
         </p>
       </div>
       <div className="mt-8 grid gap-5 lg:grid-cols-3">

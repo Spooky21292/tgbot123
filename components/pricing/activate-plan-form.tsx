@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export function ActivatePlanForm({ planId }: { planId: string }) {
-  const [promoCode, setPromoCode] = useState('TESTPROMO');
+  const [promoCode, setPromoCode] = useState('');
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 

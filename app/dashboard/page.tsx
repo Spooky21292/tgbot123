@@ -187,6 +187,26 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           ) : null}
+
+          {access?.familyOwner ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Вы в семейном тарифе</CardTitle>
+                <CardDescription>Покупка собственного тарифа недоступна, пока вы состоите в семье.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <p className="text-muted-foreground">Организатор: <span className="font-medium text-foreground">{access.familyOwner.name}</span> · {access.familyOwner.email}</p>
+                <div className="space-y-2">
+                  {access.familyGroup.map((member) => (
+                    <div key={member.id} className="rounded-xl border border-border/80 px-4 py-3">
+                      <p className="font-medium text-foreground">{member.name || member.email}</p>
+                      {member.email ? <p className="text-muted-foreground">{member.email}</p> : null}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
       </div>
     </Container>

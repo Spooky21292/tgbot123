@@ -17,6 +17,12 @@ export async function POST(request: Request) {
   const member = await db.user.findUnique({ where: { email } });
   if (!member) return NextResponse.json({ error: 'Пользователь с таким email не найден' }, { status: 404 });
   if (member.id === owner.id) return NextResponse.json({ error: 'Нельзя добавить себя' }, { status: 400 });
+  if (member.activePlan && member.planExpiresAt && new Date(member.planExpiresAt).getTime() > Date.now()) {
+    return NextResponse.json({ error: 'У пользователя уже есть свой активный тариф' }, { status: 400 });
+  }
+  if (member.familyOwnerId) {
+    return NextResponse.json({ error: 'Пользователь уже состоит в другой семье' }, { status: 400 });
+  }
 
   await db.user.update({ where: { id: member.id }, data: { familyOwnerId: owner.id } });
   return NextResponse.json({ ok: true });

@@ -8,6 +8,10 @@ export async function POST(request: Request) {
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { planId, promoCode } = await request.json().catch(() => ({}));
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (user?.familyOwnerId) {
+    return NextResponse.json({ error: 'Сначала выйдите из семейного доступа, чтобы купить свой тариф' }, { status: 400 });
+  }
   if (!['learning', 'family'].includes(planId)) {
     return NextResponse.json({ error: 'Неизвестный тариф' }, { status: 400 });
   }

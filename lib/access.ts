@@ -30,18 +30,32 @@ export async function getViewerAccess(userId: string) {
   const familyOwner = user.familyOwnerId
     ? await db.user.findUnique({
         where: { id: user.familyOwnerId },
-        select: { id: true, activePlan: true, planExpiresAt: true, name: true, email: true }
+        select: {
+          id: true,
+          activePlan: true,
+          planExpiresAt: true,
+          name: true,
+          email: true,
+          familyMembers: { select: { id: true, email: true, name: true } }
+        }
       })
     : null;
 
   const accessUser = familyOwner ?? user;
   const accessActive = hasActiveAccess(accessUser);
+  const familyGroup = familyOwner
+    ? [
+        { id: familyOwner.id, email: familyOwner.email, name: familyOwner.name },
+        ...familyOwner.familyMembers
+      ]
+    : [{ id: user.id, email: '', name: '' }, ...user.familyMembers];
 
   return {
     ...user,
     accessActive,
     accessPlan: accessUser.activePlan,
     accessExpiresAt: accessUser.planExpiresAt,
-    familyOwner
+    familyOwner,
+    familyGroup
   };
 }
