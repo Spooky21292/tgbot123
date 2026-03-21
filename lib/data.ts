@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { isFreeBlogSlug } from '@/lib/content-access';
 
 export async function getHomePageData() {
   const [courses, webinars, articles, botFeatures] = await Promise.all([
@@ -42,7 +43,7 @@ export async function getCourses(filters?: { ageGroup?: string; level?: string; 
 }
 
 export async function getBlogPosts(filters?: { search?: string; category?: string }) {
-  return db.article.findMany({
+  const posts = await db.article.findMany({
     where: {
       isPublished: true,
       ...(filters?.category ? { category: filters.category } : {}),
@@ -57,5 +58,11 @@ export async function getBlogPosts(filters?: { search?: string; category?: strin
         : {})
     },
     orderBy: { createdAt: 'desc' }
+  });
+
+  return posts.sort((a, b) => {
+    const freeScore = Number(isFreeBlogSlug(a.slug)) - Number(isFreeBlogSlug(b.slug));
+    if (freeScore !== 0) return freeScore * -1;
+    return a.title.localeCompare(b.title, 'ru');
   });
 }

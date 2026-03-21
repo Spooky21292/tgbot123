@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Bot, Bell, MessageCircleQuestion, BarChart3, Sparkles, ShieldCheck } from 'lucide-react';
+import { Bot, Sparkles, TrendingUp, ShieldCheck } from 'lucide-react';
 import { Container } from '@/components/layout/container';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 
 export const metadata: Metadata = { title: 'Telegram-бот', description: 'Telegram-ассистент FinSkills Pro' };
 
-const icons = { Bell, MessageCircleQuestion, BarChart3, Sparkles } as const;
+const icons = { Sparkles, TrendingUp } as const;
 
 export default async function BotPage() {
   const features = await db.botFeature.findMany();
@@ -47,9 +47,8 @@ export default async function BotPage() {
             <CardTitle>Как это работает</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
-            <div className="rounded-xl border border-border/80 bg-muted/30 p-4">📡 Каждый день бот просматривает публичные новости, обзоры и данные рынка, чтобы выбрать одну идею для самостоятельного изучения.</div>
             <div className="rounded-xl border border-border/80 bg-background p-4">📌 В сообщении приходит инструмент, краткая логика сценария, риск-факторы и напоминание, что решение всегда остаётся за пользователем.</div>
-            <div className="rounded-xl border border-border/80 bg-muted/30 p-4">📊 Вместо обещаний бот показывает вероятностную идею с акцентом на обучение, а не на слепое повторение.</div>
+            <div className="rounded-xl border border-border/80 bg-muted/30 p-4">📊 Бот присылает вероятностный сигнал по акции или облигации, чтобы вы могли разобрать идею, риски и сценарий самостоятельно.</div>
             <div className="rounded-xl border border-border/80 bg-background p-4">🛡️ Даже при высокой исторической точности сигнал не является гарантированным и может не сработать на реальном рынке.</div>
             <div className="flex items-start gap-3 rounded-xl border border-border/80 bg-slate-950 px-4 py-3 text-sm text-slate-100 dark:bg-slate-100 dark:text-slate-950">
               <ShieldCheck className="mt-0.5 h-4 w-4" />

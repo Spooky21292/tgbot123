@@ -59,7 +59,7 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge>{ageGroupLabel(course.ageGroup)}</Badge>
-                    {!course.isPremium ? <Badge variant="outline">Бесплатно</Badge> : null}
+                    {!course.isPremium ? <Badge variant="outline">Бесплатно</Badge> : <Badge variant="secondary">🔒 По тарифу</Badge>}
                   </div>
                   <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{courseLevelLabel(course.level)}</span>
                 </div>
