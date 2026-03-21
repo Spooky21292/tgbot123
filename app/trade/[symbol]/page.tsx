@@ -8,6 +8,7 @@ import { Container } from '@/components/layout/container';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LiveAssetPrice } from '@/components/trade/live-asset-price';
 import { PriceChart } from '@/components/trade/price-chart';
 import { OrderPanel } from '@/components/trade/order-panel';
 
@@ -31,18 +32,12 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
             <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground">{view.asset.symbol}</h1>
             <p className="mt-2 text-base text-muted-foreground">{view.asset.name}</p>
           </div>
-          <div className="rounded-2xl border border-border/80 bg-card px-5 py-4">
-            <p className="text-sm text-muted-foreground">Текущая цена</p>
-            <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">${view.quote.price.toFixed(view.asset.symbol === 'EUR/USD' ? 4 : 2)}</p>
-            <p className={view.quote.changePercent >= 0 ? 'mt-1 text-sm text-emerald-600 dark:text-emerald-400' : 'mt-1 text-sm text-rose-600 dark:text-rose-400'}>
-              {view.quote.changePercent >= 0 ? '+' : ''}{view.quote.changePercent.toFixed(2)}% за сессию
-            </p>
-          </div>
+          <LiveAssetPrice symbol={view.asset.symbol} initialQuote={view.quote} />
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
           <div className="space-y-6">
-            <PriceChart candles={candles} />
+            <PriceChart symbol={view.asset.symbol} candles={candles} />
 
             <Card>
               <CardHeader>

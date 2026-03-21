@@ -17,6 +17,8 @@ export type MarketCandle = {
   close: number;
 };
 
+export type MarketInterval = '1min' | '15min' | '1h' | '1day';
+
 const provider = (process.env.MARKET_DATA_PROVIDER ?? 'demo').toLowerCase();
 const apiKey = process.env.MARKET_DATA_API_KEY ?? '';
 
@@ -47,17 +49,33 @@ function demoQuote(symbol: string): MarketQuote {
   return { symbol, price, change, changePercent, asOf: new Date().toISOString(), source: 'demo' };
 }
 
-function demoCandles(symbol: string, points = 30): MarketCandle[] {
+function demoCandles(symbol: string, points = 30, interval: MarketInterval = '1day'): MarketCandle[] {
   const base = basePriceForSymbol(symbol);
   const seed = hashSymbol(symbol);
   const precision = symbol === 'EUR/USD' ? 4 : 2;
+  const intervalMs: Record<MarketInterval, number> = {
+    '1min': 60 * 1000,
+    '15min': 15 * 60 * 1000,
+    '1h': 60 * 60 * 1000,
+    '1day': 24 * 60 * 60 * 1000
+  };
+  const amplitude = interval === '1min'
+    ? (symbol.includes('BTC') ? 120 : base * 0.0025)
+    : interval === '15min'
+      ? (symbol.includes('BTC') ? 260 : base * 0.004)
+      : interval === '1h'
+        ? (symbol.includes('BTC') ? 520 : base * 0.008)
+        : (symbol.includes('BTC') ? 900 : base * 0.015);
+
   return Array.from({ length: points }, (_, index) => {
-    const time = new Date(Date.now() - (points - index) * 24 * 60 * 60 * 1000).toISOString();
-    const drift = Math.sin((seed + index) / 2) * (symbol.includes('BTC') ? 900 : base * 0.015);
-    const close = Number((base + drift + index * base * 0.0008).toFixed(precision));
-    const open = Number((close - Math.cos(seed + index) * (symbol.includes('EUR/USD') ? 0.002 : base * 0.004)).toFixed(precision));
-    const high = Number((Math.max(open, close) + Math.abs(Math.sin(index)) * (symbol.includes('EUR/USD') ? 0.003 : base * 0.006)).toFixed(precision));
-    const low = Number((Math.min(open, close) - Math.abs(Math.cos(index)) * (symbol.includes('EUR/USD') ? 0.003 : base * 0.006)).toFixed(precision));
+    const step = points - index;
+    const time = new Date(Date.now() - step * intervalMs[interval]).toISOString();
+    const drift = Math.sin((seed + index) / 2.4) * amplitude;
+    const trend = (index - points / 2) * (amplitude / Math.max(points * 6, 1));
+    const close = Number((base + drift + trend).toFixed(precision));
+    const open = Number((close - Math.cos(seed + index / 1.7) * amplitude * 0.32).toFixed(precision));
+    const high = Number((Math.max(open, close) + Math.abs(Math.sin(index / 2)) * amplitude * 0.24).toFixed(precision));
+    const low = Number((Math.min(open, close) - Math.abs(Math.cos(index / 2)) * amplitude * 0.24).toFixed(precision));
     return { time, open, high, low, close };
   });
 }
@@ -110,11 +128,12 @@ async function fetchTwelveDataQuote(symbol: string): Promise<MarketQuote | null>
   };
 }
 
-async function fetchAlphaVantageCandles(symbol: string): Promise<MarketCandle[] | null> {
+async function fetchAlphaVantageCandles(symbol: string, interval: MarketInterval = '1day', points = 30): Promise<MarketCandle[] | null> {
   if (!apiKey) return null;
   const isCrypto = symbol === 'BTC/USD' || symbol === 'ETH/USD';
   const isFx = symbol === 'EUR/USD';
   let url = '';
+  if (interval !== '1day') return null;
   if (isCrypto) {
     const [from, to] = symbol.split('/');
     url = `https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=${from}&market=${to}&apikey=${apiKey}`;
@@ -129,7 +148,7 @@ async function fetchAlphaVantageCandles(symbol: string): Promise<MarketCandle[] 
   const data = await response.json();
   const raw = data['Time Series (Daily)'] ?? data['Time Series FX (Daily)'] ?? data['Time Series (Digital Currency Daily)'];
   if (!raw) return null;
-  const entries = Object.entries(raw).slice(0, 30).reverse();
+  const entries = Object.entries(raw).slice(0, points).reverse();
   return entries.map(([time, value]: any) => ({
     time: new Date(time).toISOString(),
     open: Number(value['1. open'] ?? value['1a. open (USD)']),
@@ -139,13 +158,13 @@ async function fetchAlphaVantageCandles(symbol: string): Promise<MarketCandle[] 
   }));
 }
 
-async function fetchTwelveDataCandles(symbol: string): Promise<MarketCandle[] | null> {
+async function fetchTwelveDataCandles(symbol: string, interval: MarketInterval = '1day', points = 30): Promise<MarketCandle[] | null> {
   if (!apiKey) return null;
-  const response = await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=1day&outputsize=30&apikey=${apiKey}`, { next: { revalidate: 300 } });
+  const response = await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=${points}&apikey=${apiKey}`, { next: { revalidate: interval === '1min' ? 60 : 300 } });
   if (!response.ok) return null;
   const data = await response.json();
   if (!Array.isArray(data?.values)) return null;
-  return data.values.slice(0, 30).reverse().map((item: any) => ({
+  return data.values.slice(0, points).reverse().map((item: any) => ({
     time: new Date(item.datetime).toISOString(),
     open: Number(item.open),
     high: Number(item.high),
@@ -171,21 +190,23 @@ export async function getMarketQuote(symbol: string): Promise<MarketQuote> {
   return demoQuote(normalized);
 }
 
-export async function getMarketCandles(symbol: string): Promise<MarketCandle[]> {
+export async function getMarketCandles(symbol: string, options?: { interval?: MarketInterval; points?: number }): Promise<MarketCandle[]> {
   const normalized = symbol.toUpperCase();
+  const interval = options?.interval ?? '1day';
+  const points = options?.points ?? 30;
   try {
     if (provider === 'alphavantage') {
-      const candles = await fetchAlphaVantageCandles(normalized);
+      const candles = await fetchAlphaVantageCandles(normalized, interval, points);
       if (candles?.length) return candles;
     }
     if (provider === 'twelvedata') {
-      const candles = await fetchTwelveDataCandles(normalized);
+      const candles = await fetchTwelveDataCandles(normalized, interval, points);
       if (candles?.length) return candles;
     }
   } catch {
     // fall back to demo
   }
-  return demoCandles(normalized);
+  return demoCandles(normalized, points, interval);
 }
 
 export async function getWatchlistAssets(search?: string) {

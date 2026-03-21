@@ -1,17 +1,42 @@
 "use client";
 
-import { useMemo, useState, useTransition } from 'react';
+import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export function OrderPanel({ symbol, price, availableBalance, ownedQuantity }: { symbol: string; price: number; availableBalance: number; ownedQuantity: number }) {
+  const [livePrice, setLivePrice] = useState(price);
   const router = useRouter();
   const [quantity, setQuantity] = useState('1');
   const [pending, startTransition] = useTransition();
   const numericQuantity = Number(quantity || 0);
-  const estimatedTotal = useMemo(() => Number.isFinite(numericQuantity) ? numericQuantity * price : 0, [numericQuantity, price]);
+  const estimatedTotal = useMemo(() => Number.isFinite(numericQuantity) ? numericQuantity * livePrice : 0, [numericQuantity, livePrice]);
+
+  useEffect(() => {
+    setLivePrice(price);
+  }, [price]);
+
+  const refreshPrice = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/trade/market/quote?symbol=${encodeURIComponent(symbol)}`, { cache: 'no-store' });
+      const data = await response.json().catch(() => null);
+      if (response.ok && typeof data?.data?.price === 'number') {
+        setLivePrice(data.data.price);
+      }
+    } catch {
+      // keep latest visible price
+    }
+  }, [symbol]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void refreshPrice();
+    }, 60_000);
+
+    return () => window.clearInterval(intervalId);
+  }, [refreshPrice]);
 
   const submit = (side: 'BUY' | 'SELL') => {
     startTransition(async () => {
@@ -39,7 +64,7 @@ export function OrderPanel({ symbol, price, availableBalance, ownedQuantity }: {
         <div className="rounded-xl border border-border/80 bg-muted/30 p-4 text-sm">
           <div className="flex items-center justify-between gap-3">
             <span className="text-muted-foreground">Текущая цена</span>
-            <span className="font-medium text-foreground">${price.toFixed(symbol === 'EUR/USD' ? 4 : 2)}</span>
+            <span className="font-medium text-foreground">${livePrice.toFixed(symbol === 'EUR/USD' ? 4 : 2)}</span>
           </div>
           <div className="mt-2 flex items-center justify-between gap-3">
             <span className="text-muted-foreground">Доступный баланс</span>
