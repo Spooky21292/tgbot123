@@ -22,16 +22,16 @@ export default async function WebinarsPage() {
       </div>
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {webinars.map((webinar) => (
-          <Card key={webinar.id}>
-            <CardHeader>
+          <Card key={webinar.id} className="flex h-full flex-col">
+            <CardHeader className="flex-1">
               <CardTitle>{webinar.title}</CardTitle>
               <CardDescription>{webinar.description}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="mt-auto flex flex-col">
               <p className="mb-2 text-sm text-muted-foreground">Спикер: {webinar.speaker}</p>
               <p className="mb-2 text-sm text-muted-foreground">{new Date(webinar.date).toLocaleString('ru-RU')}</p>
               <p className="mb-4 text-sm text-muted-foreground">Входит в подписку и остаётся в библиотеке записей.</p>
-              <Button asChild>
+              <Button className="self-start" asChild>
                 <Link href={`/webinars/${webinar.id}`}>Открыть вебинар</Link>
               </Button>
             </CardContent>

@@ -46,8 +46,8 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {courses.length ? (
           courses.map((course) => (
-            <Card key={course.id}>
-              <CardHeader>
+            <Card key={course.id} className="flex h-full flex-col">
+              <CardHeader className="flex-1">
                 <div className="flex items-center justify-between gap-3">
                   <Badge>{ageGroupLabel(course.ageGroup)}</Badge>
                   <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{courseLevelLabel(course.level)}</span>
@@ -55,9 +55,9 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
                 <CardTitle className="mt-3 text-xl">{course.title}</CardTitle>
                 <CardDescription>{course.description}</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="mt-auto flex flex-col">
                 <p className="mb-4 text-sm text-muted-foreground">{course.lessons.length} уроков · структурированная траектория</p>
-                <Button asChild>
+                <Button className="self-start" asChild>
                   <Link href={`/courses/${course.slug}`}>Открыть</Link>
                 </Button>
               </CardContent>

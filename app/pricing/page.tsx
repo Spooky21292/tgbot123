@@ -9,8 +9,8 @@ export const metadata: Metadata = { title: 'Тарифы', description: 'Тар�
 
 const plans = [
   { id: 'start', name: 'Starter', price: '0 ₽', period: '/мес', description: 'Подходит для спокойного знакомства с платформой.', features: ['Открытые статьи и вводные материалы', 'Знакомство с интерфейсом', 'Базовые сценарии Telegram-ассистента'] },
-  { id: 'learning', name: 'Learning', price: '990 ₽', period: '/мес', description: 'Полный доступ к обучению и библиотеке записей.', features: ['Все курсы и уроки', 'Тесты, прогресс и рекомендации', 'Все вебинары и доступ к записям'] },
-  { id: 'family', name: 'Family', price: '1 790 ₽', period: '/мес', description: 'Для семьи с единым доступом к материалам.', features: ['До 3 пользователей в семье', 'Семейные сценарии и рекомендации', 'Архив вебинаров и семейный доступ к записям'] }
+  { id: 'learning', name: 'Learning', price: '499 ₽', period: '/мес', description: 'Полный доступ к обучению и библиотеке записей.', features: ['Все курсы и уроки', 'Тесты, прогресс и рекомендации', 'Все вебинары и доступ к записям'] },
+  { id: 'family', name: 'Family', price: '999 ₽', period: '/мес', description: 'Для семьи с единым доступом к материалам.', features: ['До 3 пользователей в семье', 'Семейные сценарии и рекомендации', 'Архив вебинаров и семейный доступ к записям'] }
 ];
 
 export default function PricingPage({ searchParams }: { searchParams?: { plan?: string } }) {

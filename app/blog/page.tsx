@@ -26,14 +26,14 @@ export default async function BlogPage({ searchParams }: { searchParams?: { sear
       </div>
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {posts.length ? posts.map((post) => (
-          <Card key={post.id}>
-            <CardHeader>
+          <Card key={post.id} className="flex h-full flex-col">
+            <CardHeader className="flex-1">
               <CardTitle>{post.title}</CardTitle>
               <CardDescription>{post.excerpt}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="mt-auto flex flex-col">
               <p className="mb-4 text-sm text-muted-foreground">Категория: {post.category}</p>
-              <Button asChild>
+              <Button className="self-start" asChild>
                 <Link href={`/blog/${post.slug}`}>Читать</Link>
               </Button>
             </CardContent>

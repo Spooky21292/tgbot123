@@ -11,8 +11,8 @@ import { Button } from '@/components/ui/button';
 import { formatPercent } from '@/lib/utils';
 
 const tariffPlans = [
-  { id: 'learning', name: 'Learning', price: '990 ₽ / мес', text: 'Полный доступ ко всем курсам, вебинарам и записям.' },
-  { id: 'family', name: 'Family', price: '1 790 ₽ / мес', text: 'Общий доступ для семьи с единым архивом материалов.' }
+  { id: 'learning', name: 'Learning', price: '499 ₽ / мес', text: 'Полный доступ ко всем курсам, вебинарам и записям.' },
+  { id: 'family', name: 'Family', price: '999 ₽ / мес', text: 'Общий доступ для семьи с единым архивом материалов.' }
 ];
 
 export default async function DashboardPage() {
