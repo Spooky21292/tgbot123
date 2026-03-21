@@ -41,13 +41,13 @@ npm run dev
 DATABASE_URL="file:./dev.db"
 NEXTAUTH_SECRET="change-me-super-secret"
 NEXTAUTH_URL="http://localhost:3000"
-MARKET_DATA_PROVIDER="demo"
+MARKET_DATA_PROVIDER="moex"
 MARKET_DATA_API_KEY=""
-DEMO_TRADING_START_BALANCE="100000"
+DEMO_TRADING_START_BALANCE="1000000"
 ```
 
 ### Market data provider
-По умолчанию проект использует `demo`-provider — этого достаточно для локальной проверки симулятора без ключей. Для подключения внешних рыночных данных:
+По умолчанию проект использует `moex` и пытается брать реальные котировки/свечи с Московской биржи через ISS API без отдельного API-ключа. Если MOEX временно недоступен, market-data слой откатывается на demo fallback. Также можно переключиться на сторонние провайдеры:
 - `MARKET_DATA_PROVIDER="alphavantage"` и `MARKET_DATA_API_KEY="..."`
 - или `MARKET_DATA_PROVIDER="twelvedata"` и `MARKET_DATA_API_KEY="..."`
 
@@ -58,7 +58,7 @@ DEMO_TRADING_START_BALANCE="100000"
 
 Что умеет:
 - автоматически создаёт пользователю демо-счёт;
-- стартует с виртуального баланса `100000`;
+- стартует с виртуального баланса `1000000` ₽;
 - показывает watchlist российских активов (`SBER`, `GAZP`, `LKOH`, `SU26238RMFS4`, `SU26243RMFS4`, `SU26248RMFS3`);
 - отображает текущие котировки и историю цен через market-data abstraction;
 - позволяет покупать и продавать активы на виртуальные деньги;
