@@ -37,7 +37,7 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
           <LiveAssetPrice symbol={view.asset.symbol} initialQuote={view.quote} />
         </div>
 
-        <div className="mt-8 grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
           <div className="space-y-6">
             <PriceChart symbol={view.asset.symbol} candles={candles} initialQuote={view.quote} />
 
@@ -91,7 +91,9 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
             </Card>
           </div>
 
-          <OrderPanel symbol={view.asset.symbol} price={view.quote.price} availableBalance={view.account.balance} ownedQuantity={view.position?.quantity ?? 0} />
+          <div className="lg:min-w-[400px]">
+            <OrderPanel symbol={view.asset.symbol} price={view.quote.price} availableBalance={view.account.balance} ownedQuantity={view.position?.quantity ?? 0} />
+          </div>
         </div>
       </Container>
     );
