@@ -31,8 +31,8 @@ export default async function CoursePage({ params }: { params: { slug: string } 
   const progress = session?.user
     ? await db.userProgress.findMany({ where: { userId: session.user.id, lesson: { courseId: course.id } } })
     : [];
-  const completedLessonIds = new Set(progress.filter((item) => item.completed).map((item) => item.lessonId));
-  const nextLesson = course.lessons.find((lesson) => !completedLessonIds.has(lesson.id)) ?? course.lessons[0];
+  const completedLessonIds = new Set(progress.filter((item: any) => item.completed).map((item: any) => item.lessonId));
+  const nextLesson = course.lessons.find((lesson: any) => !completedLessonIds.has(lesson.id)) ?? course.lessons[0];
 
   return (
     <Container className="py-10 sm:py-12">
@@ -65,7 +65,7 @@ export default async function CoursePage({ params }: { params: { slug: string } 
           </div>
 
           <div className="mt-8 space-y-4">
-            {course.lessons.map((lesson) => {
+            {course.lessons.map((lesson: any) => {
               const completed = completedLessonIds.has(lesson.id);
               return (
                 <Card key={lesson.id}>

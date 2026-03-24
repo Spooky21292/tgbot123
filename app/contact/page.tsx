@@ -26,7 +26,7 @@ export default function ContactPage() {
           <div className="mt-6 rounded-2xl border border-border/80 bg-card p-5 text-sm">
             <p className="font-medium text-foreground">Telegram-контакты</p>
             <div className="mt-3 flex flex-wrap gap-3 text-muted-foreground">
-              {contacts.map((contact) => (
+              {contacts.map((contact: any) => (
                 <a key={contact.href} href={contact.href} target="_blank" rel="noreferrer" className="transition-colors hover:text-foreground">
                   {contact.label}
                 </a>

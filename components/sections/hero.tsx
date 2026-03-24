@@ -46,7 +46,7 @@ export function HeroSection({
         </div>
 
         <div className="mt-12 grid gap-4 border-t border-border/70 pt-8 sm:grid-cols-3">
-          {stats.map(([value, text]) => (
+          {stats.map(([value, text]: any) => (
             <div key={value} className="space-y-1">
               <p className="text-sm font-medium text-foreground">{value}</p>
               <p className="text-sm leading-6 text-muted-foreground">{text}</p>

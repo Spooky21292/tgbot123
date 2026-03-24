@@ -30,19 +30,19 @@ export default async function DashboardPage() {
     getViewerAccess(session.user.id)
   ]);
 
-  const completedLessonIds = new Set(progress.filter((item) => item.completed).map((item) => item.lessonId));
+  const completedLessonIds = new Set(progress.filter((item: any) => item.completed).map((item: any) => item.lessonId));
   const totalLessons = courses.reduce((sum, course) => sum + course.lessons.length, 0);
   const completion = totalLessons ? (completedLessonIds.size / totalLessons) * 100 : 0;
-  const startedCourses = new Set(progress.map((item) => item.lesson.courseId)).size;
+  const startedCourses = new Set(progress.map((item: any) => item.lesson.courseId)).size;
 
   const nextLesson = courses
-    .flatMap((course) => course.lessons.map((lesson) => ({ lesson, course })))
-    .find(({ lesson }) => !completedLessonIds.has(lesson.id));
+    .flatMap((course: any) => course.lessons.map((lesson: any) => ({ lesson, course })))
+    .find(({ lesson }: any) => !completedLessonIds.has(lesson.id));
 
   const recentActivity = progress
-    .filter((item) => item.completed)
+    .filter((item: any) => item.completed)
     .slice(0, 3)
-    .map((item) => ({
+    .map((item: any) => ({
       id: item.id,
       title: item.lesson.title,
       meta: `${item.lesson.course.title} · ${item.completedAt ? new Date(item.completedAt).toLocaleDateString('ru-RU') : 'Сегодня'}`
@@ -57,7 +57,7 @@ export default async function DashboardPage() {
     activityMap.set(key, { label: date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), lessons: 0, active: 0 });
   }
 
-  for (const item of progress.filter((entry) => entry.completed && entry.completedAt)) {
+  for (const item of progress.filter((entry: any) => entry.completed && entry.completedAt)) {
     const key = new Date(item.completedAt as Date).toISOString().slice(0, 10);
     const current = activityMap.get(key);
     if (current) {
@@ -73,8 +73,8 @@ export default async function DashboardPage() {
   }
 
   const chartData = [...activityMap.values()];
-  const activeDays = chartData.filter((item) => item.active > 0).length;
-  const viewedLessonsMonth = chartData.reduce((sum, item) => sum + item.lessons, 0);
+  const activeDays = chartData.filter((item: any) => item.active > 0).length;
+  const viewedLessonsMonth = chartData.reduce((sum: any, item: any) => sum + item.lessons, 0);
 
   return (
     <Container className="py-10 sm:py-12">
@@ -92,7 +92,7 @@ export default async function DashboardPage() {
           ['Начатые курсы', String(startedCourses)],
           ['Учебных дней за месяц', String(activeDays)],
           ['Доступ', access?.accessActive ? `до ${new Date(access.accessExpiresAt ?? '').toLocaleDateString('ru-RU')}` : 'не активен']
-        ].map(([label, value]) => (
+        ].map(([label, value]: any) => (
           <Card key={label}>
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">{label}</p>
@@ -156,7 +156,7 @@ export default async function DashboardPage() {
             <CardTitle className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Последняя активность</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentActivity.length ? recentActivity.map((item) => (
+            {recentActivity.length ? recentActivity.map((item: any) => (
               <div key={item.id} className="border-t border-border/70 pt-4 first:border-t-0 first:pt-0">
                 <p className="font-medium text-foreground">{item.title}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{item.meta}</p>
@@ -165,7 +165,7 @@ export default async function DashboardPage() {
 
             <div className="border-t border-border/70 pt-4">
               <p className="mb-2 flex items-center gap-2 font-medium text-foreground"><CalendarClock className="h-4 w-4 text-primary" /> Вебинары в доступе</p>
-              {webinars.map((webinar) => (
+              {webinars.map((webinar: any) => (
                 <div key={webinar.id} className="mt-3 text-sm text-muted-foreground">
                   <p className="font-medium text-foreground">{webinar.title}</p>
                   <p>{new Date(webinar.date).toLocaleDateString('ru-RU')}</p>
@@ -182,7 +182,7 @@ export default async function DashboardPage() {
               <h2 className="text-lg font-semibold tracking-tight text-foreground">Тарифы и оплата</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              {tariffPlans.map((plan) => (
+              {tariffPlans.map((plan: any) => (
                 <Card key={plan.id} id={plan.id} className="rounded-[28px] bg-white/90 dark:bg-card">
                   <CardHeader className="px-6 py-8 sm:p-8 sm:pb-6">
                     <div className="grid w-full grid-cols-1 items-center justify-center text-left">
@@ -229,7 +229,7 @@ export default async function DashboardPage() {
               <CardContent className="space-y-4 text-sm">
                 <p className="text-muted-foreground">Организатор: <span className="font-medium text-foreground">{access.familyOwner.name}</span> · {access.familyOwner.email}</p>
                 <div className="space-y-2">
-                  {access.familyGroup.map((member) => (
+                  {access.familyGroup.map((member: any) => (
                     <div key={member.id} className="rounded-xl border border-border/80 px-4 py-3">
                       <p className="font-medium text-foreground">{member.name || member.email}</p>
                       {member.email ? <p className="text-muted-foreground">{member.email}</p> : null}

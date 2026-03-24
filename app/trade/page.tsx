@@ -107,7 +107,7 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
             ['Рыночная стоимость', `${data.metrics.portfolioValue.toFixed(2)} ₽`],
             ['Нереализованный PnL', `${data.metrics.unrealizedPnl >= 0 ? '+' : ''}${data.metrics.unrealizedPnl.toFixed(2)} ₽`],
             ['Доходность', `${data.metrics.totalReturn >= 0 ? '+' : ''}${data.metrics.totalReturn.toFixed(2)}%`]
-          ].map(([label, value]) => (
+          ].map(([label, value]: any) => (
             <Card key={label}>
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground">{label}</p>
@@ -124,7 +124,7 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
               <CardDescription>Открытые позиции и текущая оценка по рынку.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
-              {data.positions.length ? data.positions.map(({ position, quote, marketValue, unrealizedPnl }) => (
+              {data.positions.length ? data.positions.map(({ position, quote, marketValue, unrealizedPnl }: any) => (
                 <div key={position.id} className="flex flex-col gap-3 rounded-xl border border-border/80 bg-muted/20 p-3.5 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="font-medium text-foreground">{position.asset.symbol}</p>
@@ -179,7 +179,7 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
                   ['all', 'Все'],
                   ['stock', 'Акции'],
                   ['bond', 'Облигации']
-                ].map(([type, label]) => (
+                ].map(([type, label]: any) => (
                   <Link
                     key={type}
                     href={buildTradeQuery(searchParams, { type, page: '1' })}
@@ -191,7 +191,7 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
               </div>
 
               <div className="space-y-3">
-                {data.watchlist.length ? data.watchlist.map(({ asset, quote }) => (
+                {data.watchlist.length ? data.watchlist.map(({ asset, quote }: any) => (
                   <Link key={asset.id} href={`/trade/${encodeURIComponent(asset.symbol)}`} className="flex items-center justify-between rounded-xl border border-border/80 px-3.5 py-2.5 transition-colors hover:bg-muted/30">
                     <div>
                       <p className="font-medium text-foreground">{asset.symbol}</p>
@@ -241,7 +241,7 @@ export default async function TradePage({ searchParams }: { searchParams?: Trade
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              {data.trades.length ? data.trades.map((trade) => (
+              {data.trades.length ? data.trades.map((trade: any) => (
                 <div key={trade.id} className="flex flex-col gap-2 rounded-xl border border-border/80 px-4 py-3 text-sm md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="font-medium text-foreground">{trade.asset.symbol} · {trade.side}</p>

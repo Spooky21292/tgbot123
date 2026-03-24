@@ -40,7 +40,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: { sear
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
-        {blogTopics.map((topic) => (
+        {blogTopics.map((topic: any) => (
           <Button key={topic} variant={searchParams?.topic === topic ? 'secondary' : 'outline'} size="sm" asChild>
             <Link href={`/blog?topic=${encodeURIComponent(topic)}`}>{topic}</Link>
           </Button>
@@ -48,7 +48,7 @@ export default async function BlogPage({ searchParams }: { searchParams?: { sear
       </div>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
-        {posts.length ? posts.map((post) => {
+        {posts.length ? posts.map((post: any) => {
           const isFree = isFreeBlogSlug(post.slug);
           const canOpen = isFree || accessActive;
           return (

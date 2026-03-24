@@ -21,11 +21,11 @@ function BlockCallout({ title, icon, tone, children }: { title: string; icon: Re
 }
 
 export function LessonContent({ content }: { content: string }) {
-  const blocks = content.split('\n\n').map((block) => block.trim()).filter(Boolean);
+  const blocks = content.split('\n\n').map((block: any) => block.trim()).filter(Boolean);
 
   return (
     <div className="prose-finance">
-      {blocks.map((block, index) => {
+      {blocks.map((block: any, index: any) => {
         if (block.startsWith('# ')) {
           return <h1 key={index}>{block.replace('# ', '')}</h1>;
         }
@@ -51,11 +51,11 @@ export function LessonContent({ content }: { content: string }) {
         }
 
         if (block.startsWith('- ')) {
-          const items = block.split('\n').map((item) => item.replace(/^- /, '').trim()).filter(Boolean);
+          const items = block.split('\n').map((item: any) => item.replace(/^- /, '').trim()).filter(Boolean);
           return (
             <div key={index} className="rounded-2xl border border-border/80 bg-muted/30 p-5">
               <ul className="space-y-3 text-sm leading-7 text-slate-700 dark:text-slate-300">
-                {items.map((item) => (
+                {items.map((item: any) => (
                   <li key={item} className="flex gap-3">
                     <span className="mt-3 h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>{item}</span>

@@ -17,10 +17,10 @@ export default async function AdminPage() {
     db.article.findMany({ orderBy: { createdAt: 'desc' } })
   ]);
   return <Container className="py-12"><h1 className="text-4xl font-semibold">Админ-панель</h1><div className="mt-8 grid gap-6 lg:grid-cols-2">{[
-    ['Пользователи', users.map((item) => `${item.name} — ${item.email} (${item.role})`)],
-    ['Курсы', courses.map((item) => `${item.title} — ${item.lessons.length} уроков`)],
-    ['Вебинары', webinars.map((item) => `${item.title} — ${new Date(item.date).toLocaleDateString('ru-RU')}`)],
-    ['Заявки', contacts.map((item) => `${item.name} — ${item.email}`)],
-    ['Статьи', articles.map((item) => `${item.title} — ${item.category}`)]
-  ].map(([title, items]) => <Card key={String(title)}><CardHeader><CardTitle>{String(title)}</CardTitle></CardHeader><CardContent className="space-y-2 text-sm text-muted-foreground">{(items as string[]).length ? (items as string[]).map((item) => <p key={item}>{item}</p>) : <p>Пока пусто.</p>}</CardContent></Card>)}</div><p className="mt-8 text-sm text-muted-foreground">Админ-панель собрана как операционный центр: здесь видны пользователи, курсы, вебинары, обращения и контент блога.</p></Container>;
+    ['Пользователи', users.map((item: any) => `${item.name} — ${item.email} (${item.role})`)],
+    ['Курсы', courses.map((item: any) => `${item.title} — ${item.lessons.length} уроков`)],
+    ['Вебинары', webinars.map((item: any) => `${item.title} — ${new Date(item.date).toLocaleDateString('ru-RU')}`)],
+    ['Заявки', contacts.map((item: any) => `${item.name} — ${item.email}`)],
+    ['Статьи', articles.map((item: any) => `${item.title} — ${item.category}`)]
+  ].map(([title, items]: any) => <Card key={String(title)}><CardHeader><CardTitle>{String(title)}</CardTitle></CardHeader><CardContent className="space-y-2 text-sm text-muted-foreground">{(items as string[]).length ? (items as string[]).map((item: any) => <p key={item}>{item}</p>) : <p>Пока пусто.</p>}</CardContent></Card>)}</div><p className="mt-8 text-sm text-muted-foreground">Админ-панель собрана как операционный центр: здесь видны пользователи, курсы, вебинары, обращения и контент блога.</p></Container>;
 }

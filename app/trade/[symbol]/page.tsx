@@ -76,7 +76,7 @@ export default async function AssetTradePage({ params }: { params: { symbol: str
                 <CardDescription>История операций только в рамках демо-симулятора.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {view.trades.length ? view.trades.map((trade) => (
+                {view.trades.length ? view.trades.map((trade: any) => (
                   <div key={trade.id} className="flex flex-col gap-2 rounded-xl border border-border/80 px-4 py-3 text-sm md:flex-row md:items-center md:justify-between">
                     <p className="font-medium text-foreground">{trade.side}</p>
                     <div className="grid gap-1 text-muted-foreground sm:grid-cols-3 md:min-w-[360px]">

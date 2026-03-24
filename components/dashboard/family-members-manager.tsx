@@ -39,7 +39,7 @@ export function FamilyMembersManager({ members }: { members: FamilyMember[] }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        {members.length ? members.map((member) => (
+        {members.length ? members.map((member: any) => (
           <div key={member.id} className="flex items-center justify-between gap-3 rounded-xl border border-border/80 px-4 py-3 text-sm">
             <div>
               <p className="font-medium text-foreground">{member.name}</p>

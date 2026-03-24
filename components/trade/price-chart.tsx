@@ -127,8 +127,8 @@ export function PriceChart({
   const paddingX = 56;
   const precision = 2;
   const currencySymbol = getCurrencySymbol(symbol);
-  const highs = visibleCandles.map((item) => item.high);
-  const lows = visibleCandles.map((item) => item.low);
+  const highs = visibleCandles.map((item: any) => item.high);
+  const lows = visibleCandles.map((item: any) => item.low);
   const min = Math.min(...lows);
   const max = Math.max(...highs);
   const rangeValue = Math.max(max - min, 1 / 10 ** precision);
@@ -165,7 +165,7 @@ export function PriceChart({
 
         <div className="flex flex-col gap-2 self-start">
           <div className="flex items-center gap-2 rounded-xl border border-border/70 bg-muted/30 p-1">
-            {(['1D', '1W', '1M'] as ChartRange[]).map((item) => (
+            {(['1D', '1W', '1M'] as ChartRange[]).map((item: any) => (
               <button
                 key={item}
                 type="button"
@@ -189,14 +189,14 @@ export function PriceChart({
 
       <div className="mt-4 overflow-x-auto">
         <svg viewBox={`0 0 ${width} ${height}`} className="h-[360px] min-w-[760px] w-full">
-          {gridLines.map((line) => (
+          {gridLines.map((line: any) => (
             <g key={line.y}>
               <line x1={paddingX} y1={line.y} x2={width - paddingX} y2={line.y} stroke="#334155" strokeOpacity="0.35" strokeDasharray="4 6" />
               <text x={width - paddingX + 8} y={line.y + 4} fontSize="12" fill="#94a3b8">{formatPrice(line.price, precision)}</text>
             </g>
           ))}
 
-          {visibleCandles.map((candle, index) => {
+          {visibleCandles.map((candle: any, index: any) => {
             const centerX = paddingX + candleSlot * index + candleSlot / 2;
             const openY = yForPrice(candle.open);
             const closeY = yForPrice(candle.close);
@@ -215,7 +215,7 @@ export function PriceChart({
             );
           })}
 
-          {visibleCandles.map((candle, index) => {
+          {visibleCandles.map((candle: any, index: any) => {
             const centerX = paddingX + candleSlot * index + candleSlot / 2;
             const label = range === '1D'
               ? new Date(candle.time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })

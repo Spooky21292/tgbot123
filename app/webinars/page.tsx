@@ -27,7 +27,7 @@ export default async function WebinarsPage() {
         </p>
       </div>
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
-        {webinars.map((webinar) => (
+        {webinars.map((webinar: any) => (
           <Card key={webinar.id} className="flex h-full flex-col">
             <CardHeader className="flex-1">
               <CardTitle>{webinar.title}</CardTitle>

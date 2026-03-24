@@ -55,7 +55,7 @@ export function QuizForm({ quiz, lessonId, initialCompleted = false }: { quiz: a
             <div key={question.id} className="space-y-3 border-t border-border/70 pt-6 first:border-t-0 first:pt-0">
               <p className="font-medium leading-7 text-foreground">{index + 1}. {question.question}</p>
               <div className="space-y-3">
-                {['A', 'B', 'C', 'D'].map((option) => {
+                {['A', 'B', 'C', 'D'].map((option: any) => {
                   const text = question[`option${option}` as const];
                   const checked = answers[question.id] === option;
                   return (

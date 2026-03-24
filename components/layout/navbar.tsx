@@ -34,7 +34,7 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          {links.map(([label, href]) => (
+          {links.map(([label, href]: any) => (
             <Link key={href} href={href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
               {label}
             </Link>

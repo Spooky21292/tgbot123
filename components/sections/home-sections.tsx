@@ -41,7 +41,7 @@ export function HomeSections({
             </h2>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {benefits.map((item) => (
+            {benefits.map((item: any) => (
               <Card key={item.title}>
                 <CardHeader>
                   <CardTitle>{item.title}</CardTitle>

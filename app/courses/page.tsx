@@ -53,7 +53,7 @@ export default async function CoursesPage({ searchParams }: { searchParams?: { a
 
       <div className="mt-8 grid gap-5 lg:grid-cols-3">
         {courses.length ? (
-          courses.map((course) => (
+          courses.map((course: any) => (
             <Card key={course.id} className="flex h-full flex-col">
               <CardHeader className="flex-1">
                 <div className="flex items-center justify-between gap-3">

@@ -25,7 +25,7 @@ export default async function BotPage() {
             <Button variant="secondary">Посмотреть сценарии</Button>
           </div>
           <div className="mt-8 grid gap-4">
-            {features.map((feature) => {
+            {features.map((feature: any) => {
               const Icon = icons[feature.icon as keyof typeof icons] ?? Bot;
               return (
                 <Card key={feature.id}>

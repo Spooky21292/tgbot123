@@ -26,7 +26,7 @@ const provider = (process.env.MARKET_DATA_PROVIDER ?? 'moex').toLowerCase();
 const apiKey = process.env.MARKET_DATA_API_KEY ?? '';
 
 const RUSSIAN_ASSET_META: Record<string, RussianAssetMeta> = Object.fromEntries(
-  RUSSIAN_ASSETS.map((asset) => [asset.symbol, asset])
+  RUSSIAN_ASSETS.map((asset: any) => [asset.symbol, asset])
 );
 
 function hashSymbol(symbol: string) {
@@ -340,6 +340,6 @@ export async function getWatchlistAssets(search?: string) {
 
 export async function getWatchlistQuotes(search?: string) {
   const assets = await getWatchlistAssets(search);
-  const quotes = await Promise.all(assets.map((asset) => getMarketQuote(asset.symbol)));
-  return assets.map((asset, index) => ({ asset, quote: quotes[index] }));
+  const quotes = await Promise.all(assets.map((asset: any) => getMarketQuote(asset.symbol)));
+  return assets.map((asset: any, index: any) => ({ asset, quote: quotes[index] }));
 }

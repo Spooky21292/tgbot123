@@ -29,7 +29,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { p
         </p>
       </div>
       <div className="mt-8 grid gap-5 lg:grid-cols-4">
-        {plans.map((plan) => (
+        {plans.map((plan: any) => (
           <Card key={plan.id} id={plan.id} className="flex h-full flex-col rounded-[28px] bg-white/90 dark:bg-card">
             <CardHeader className="flex min-h-[240px] flex-col px-6 py-8 sm:p-10 sm:pb-6">
               <div className="flex h-full w-full flex-col justify-between text-left">
@@ -48,7 +48,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: { p
             </CardHeader>
             <CardContent className="flex flex-1 flex-col px-6 pb-8 sm:px-8">
               <div className="mb-6 space-y-3">
-                {plan.features.map((feature) => (
+                {plan.features.map((feature: any) => (
                   <div key={feature} className="flex items-start gap-2 text-sm leading-6 text-muted-foreground">
                     <Check className="mt-1 h-4 w-4 text-primary" />
                     <span>{feature}</span>

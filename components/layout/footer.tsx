@@ -26,7 +26,7 @@ export function Footer() {
         <div className="space-y-2">
           <p className="font-medium text-foreground">Контакты</p>
           <div className="flex flex-wrap gap-3">
-            {contacts.map((contact) => (
+            {contacts.map((contact: any) => (
               <a key={contact.href} href={contact.href} target="_blank" rel="noreferrer" className="transition-colors hover:text-foreground">
                 {contact.label}
               </a>
