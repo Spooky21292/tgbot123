@@ -32,6 +32,7 @@ cp .env.example .env
 
 python -m venv .venv
 source .venv/bin/activate
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 
 python -m app.main
@@ -66,6 +67,19 @@ python -m app.main
 - `/stop` — отписка
 
 Если OpenRouter или внешние API временно недоступны, бот отправит fallback-сообщение и не упадет.
+
+## Troubleshooting (если IDE показывает `Unresolved reference telegram`)
+1. Убедитесь, что выбран Python-интерпретатор вашего проекта (venv).
+2. Установите зависимости именно в этот интерпретатор:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Перезапустите IDE indexing/reload.
+
+Если запускали как `python app/main.py`, переключитесь на:
+```bash
+python -m app.main
+```
 
 ## Команды
 - `/start`

@@ -22,38 +22,41 @@ class FinanceDigestBot:
         self.storage_service = storage_service
         self.analysis_service = analysis_service
 
-    async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def cmd_start(self, update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
         try:
             if update.effective_chat:
                 self.storage_service.add_subscriber(update.effective_chat.id)
-                await update.message.reply_text(
-                    "✅ Вы подписаны на ежедневную финансовую сводку."
-                )
+                if update.message:
+                    await update.message.reply_text(
+                        "✅ Вы подписаны на ежедневную финансовую сводку."
+                    )
         except Exception as exc:
             logger.exception("/start failed: %s", exc)
             if update.message:
                 await update.message.reply_text("Ошибка подписки. Попробуйте позже.")
 
-    async def cmd_stop(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def cmd_stop(self, update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
         try:
             if update.effective_chat:
                 self.storage_service.remove_subscriber(update.effective_chat.id)
-                await update.message.reply_text("🛑 Вы отписаны от сводки.")
+                if update.message:
+                    await update.message.reply_text("🛑 Вы отписаны от сводки.")
         except Exception as exc:
             logger.exception("/stop failed: %s", exc)
             if update.message:
                 await update.message.reply_text("Ошибка отписки. Попробуйте позже.")
 
-    async def cmd_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def cmd_status(self, update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
         try:
             count = len(self.storage_service.list_subscribers())
-            await update.message.reply_text(f"✅ Бот работает. Подписчиков: {count}")
+            if update.message:
+                await update.message.reply_text(f"✅ Бот работает. Подписчиков: {count}")
         except Exception as exc:
             logger.exception("/status failed: %s", exc)
             if update.message:
                 await update.message.reply_text("Ошибка получения статуса.")
 
-    async def cmd_digest(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def cmd_digest(self, update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
         await self._send_digest_to_chat(update.effective_chat.id if update.effective_chat else 0)
 
     async def send_digest_to_subscribers(self) -> None:
