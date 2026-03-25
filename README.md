@@ -1,52 +1,96 @@
 # Financial Digest Telegram Bot (OpenRouter + Python)
 
-Production-ready MVP Telegram-бот с ежедневной финансовой сводкой:
-- собирает новости (RSS),
-- подтягивает рыночные данные (yfinance),
-- генерирует структурированный дайджест через OpenRouter,
-- рассылает подписчикам 1 раз в день через APScheduler.
+Production-like MVP Telegram-бот с ежедневной финансовой сводкой:
+- новости из RSS,
+- рыночные данные через yfinance,
+- генерация аналитического текста через OpenRouter,
+- ежедневная рассылка подписчикам через APScheduler.
 
-## 1) Получение TELEGRAM_BOT_TOKEN
-1. Откройте `@BotFather` в Telegram.
-2. Выполните `/newbot`.
-3. Скопируйте токен вида `123456789:ABC...`.
-4. Вставьте в `TELEGRAM_BOT_TOKEN`.
+## Структура проекта
 
-## 2) Получение OPENROUTER_API_KEY
-1. Зарегистрируйтесь на [OpenRouter](https://openrouter.ai/).
-2. Перейдите в раздел API Keys.
-3. Создайте ключ.
-4. Вставьте его в `OPENROUTER_API_KEY`.
+```text
+project/
+  app/
+    __init__.py
+    main.py
+    bot.py
+    config.py
+    logger.py
+    scheduler.py
+    services/
+      __init__.py
+      ai_service.py
+      analysis_service.py
+      market_service.py
+      news_service.py
+      storage_service.py
+  .env.example
+  requirements.txt
+  README.md
+```
 
-> По умолчанию используется бесплатная модель: `deepseek/deepseek-chat:free`.
+## 1) Как получить токены
 
-## 3) Локальный запуск
+### TELEGRAM_BOT_TOKEN
+1. Откройте `@BotFather`.
+2. Создайте бота (`/newbot`) или выберите существующего (`/mybots`).
+3. Возьмите API token.
 
-### Требования
-- Python 3.11+
+### OPENROUTER_API_KEY
+1. Зарегистрируйтесь на https://openrouter.ai/
+2. Создайте API key.
+3. Вставьте ключ в `.env`.
 
-### Шаги
-```bash
-cp .env.example .env
-# заполните токены в .env
+## 2) Локальный запуск на Windows
 
-python -m venv .venv
-source .venv/bin/activate
+### Создать venv
+```powershell
+py -3.11 -m venv .venv
+```
+
+### Активировать venv
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+### Установить зависимости
+```powershell
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+```
 
+### Заполнить .env
+```powershell
+copy .env.example .env
+```
+Откройте `.env` и задайте:
+- `TELEGRAM_BOT_TOKEN`
+- `OPENROUTER_API_KEY`
+
+### Запустить бота (правильная команда)
+```powershell
 python -m app.main
 ```
 
-> Можно запускать и так: `python app/bot.py` — файл автоматически прокинет запуск в `app.main`.
+> Не запускайте `python app/bot.py`. Точка входа проекта: `app.main`.
 
-При старте бот:
-- выводит путь к `.env`,
-- показывает факт загрузки токенов (без вывода самих токенов),
-- выполняет проверку Telegram API через `getMe`.
+## 3) Проверка токена Telegram через getMe
 
-## 4) Деплой на Railway
-1. Создайте новый проект Railway и подключите GitHub-репозиторий.
+В проекте это делается автоматически при старте (`test_telegram_token`).
+
+Ручная проверка:
+```text
+https://api.telegram.org/bot<YOUR_TOKEN>/getMe
+```
+
+Если получаете `401 Unauthorized`:
+- токен неверный или отозван,
+- перевыпустите токен через `@BotFather`,
+- обновите `.env`,
+- перезапустите бота.
+
+## 4) Railway deploy
+1. Подключите репозиторий к Railway.
 2. В `Variables` добавьте:
    - `TELEGRAM_BOT_TOKEN`
    - `OPENROUTER_API_KEY`
@@ -54,59 +98,19 @@ python -m app.main
    - `DIGEST_HOUR_UTC`, `DIGEST_MINUTE_UTC`
    - `REQUEST_TIMEOUT_SECONDS` (опционально)
    - `RSS_FEEDS` (опционально)
-3. Команда запуска:
-   ```bash
-   python -m app.main
-   ```
-
-Важно: в production бот читает значения через `os.getenv`; `.env` нужен только для локальной разработки.
-
-## 5) Проверка работоспособности
-После запуска в Telegram:
-- `/start` — подписка
-- `/status` — статус бота
-- `/digest` — отправка сводки вручную
-- `/stop` — отписка
-
-Если OpenRouter или внешние API временно недоступны, бот отправит fallback-сообщение и не упадет.
-
-## Troubleshooting (если IDE показывает `Unresolved reference telegram`)
-1. Убедитесь, что выбран Python-интерпретатор вашего проекта (venv).
-2. Установите зависимости именно в этот интерпретатор:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Перезапустите IDE indexing/reload.
-
-Если запускали как `python app/main.py`, переключитесь на:
+3. Start command:
 ```bash
 python -m app.main
 ```
 
-Если запускали `python app/bot.py`, теперь это тоже поддерживается (внутри будет вызван `app.main`).
+## 5) Команды в Telegram
+- `/start` — подписка
+- `/stop` — отписка
+- `/status` — статус
+- `/digest` — отправить сводку вручную
 
-
-### Ошибка `401 Unauthorized` на `getMe`
-Это почти всегда означает, что `TELEGRAM_BOT_TOKEN` неверный или отозван.
-
-Сделайте так:
-1. Откройте `@BotFather` → `/mybots` → выберите бота → `API Token`.
-2. Сгенерируйте новый токен.
-3. Вставьте в `.env` **без кавычек и пробелов**.
-4. Полностью перезапустите процесс бота.
-
-## Команды
-- `/start`
-- `/stop`
-- `/digest`
-- `/status`
-
-## Формат сводки
-1. Новости
-2. Рынки
-3. Идеи (не советы)
-4. Риски
-5. Сценарии
-
-В конце всегда добавляется:
-`⚠️ Это не инвестиционная рекомендация`
+## 6) Надежность конфигурации
+- `.env` загружается из корня проекта через `pathlib`.
+- Переменные окружения Railway имеют приоритет (dotenv не перезаписывает уже заданные env).
+- Токены чистятся от пробелов/кавычек/переносов.
+- Логируются путь к `.env` и длины токенов (без вывода секретов).

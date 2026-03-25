@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 def test_telegram_token(token: str, timeout_seconds: int) -> None:
-    url = f"https://api.telegram.org/bot{token}/getMe"
+    cleaned_token = token.strip()
+    logger.info("Telegram token length for getMe check: %d", len(cleaned_token))
+    url = f"https://api.telegram.org/bot{cleaned_token}/getMe"
     try:
         response = requests.get(url, timeout=timeout_seconds)
     except requests.RequestException as exc:
