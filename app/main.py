@@ -7,7 +7,7 @@ import requests
 from telegram.ext import Application
 
 from app.bot import FinanceDigestBot
-from app.config import ENV_PATH, load_settings
+from app.config import load_settings
 from app.logger import setup_logger
 from app.scheduler import DigestScheduler
 from app.services.ai_service import AIService
@@ -55,7 +55,7 @@ async def run() -> None:
     setup_logger()
     settings = load_settings()
 
-    print(f"ENV path: {ENV_PATH}")
+    print("Environment source: system variables only (.env disabled)")
     print(f"TELEGRAM_BOT_TOKEN loaded: {'yes' if settings.telegram_bot_token else 'no'}")
     print(f"OPENROUTER_API_KEY loaded: {'yes' if settings.openrouter_api_key else 'no'}")
 
