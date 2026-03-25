@@ -19,6 +19,7 @@ Production-like MVP Telegram-бот с ежедневной финансовой
 ### OPENROUTER_API_KEY
 1. Зарегистрируйтесь на https://openrouter.ai/
 2. Создайте API key.
+3. Для бесплатной модели используйте `deepseek/deepseek-chat:free`.
 
 ## 2) Локальный запуск на Windows (без .env)
 
@@ -43,6 +44,8 @@ pip install -r requirements.txt
 $env:TELEGRAM_BOT_TOKEN = "123456789:REPLACE_ME"
 $env:OPENROUTER_API_KEY = "sk-or-v1-REPLACE_ME"
 $env:OPENROUTER_MODEL = "deepseek/deepseek-chat:free"
+$env:OPENROUTER_SITE_URL = "https://your-site.example"   # optional
+$env:OPENROUTER_APP_NAME = "finance-digest-bot"          # optional
 $env:DIGEST_HOUR_UTC = "7"
 $env:DIGEST_MINUTE_UTC = "0"
 ```
@@ -83,3 +86,13 @@ python -m app.main
 - `/stop`
 - `/status`
 - `/digest`
+
+
+## 6) OpenRouter интеграция
+Проект использует OpenRouter Quickstart-схему для прямого API-запроса:
+- `POST https://openrouter.ai/api/v1/chat/completions`
+- заголовок `Authorization: Bearer <OPENROUTER_API_KEY>`
+- optional headers: `HTTP-Referer`, `X-OpenRouter-Title`
+- модель по умолчанию: `deepseek/deepseek-chat:free`
+
+В коде есть retry + timeout + fallback, если API временно недоступен.

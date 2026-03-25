@@ -34,7 +34,7 @@ def test_telegram_token(token: str, timeout_seconds: int) -> None:
         raise ValueError(
             "Telegram returned 401 Unauthorized for getMe. "
             "Your TELEGRAM_BOT_TOKEN is invalid/revoked. "
-            "Generate a fresh token in @BotFather and update .env / Railway Variables."
+            "Generate a fresh token in @BotFather and update environment variables."
         )
 
     try:
@@ -70,6 +70,8 @@ async def run() -> None:
         api_key=settings.openrouter_api_key,
         model=settings.openrouter_model,
         timeout_seconds=settings.request_timeout_seconds,
+        site_url=settings.openrouter_site_url,
+        app_name=settings.openrouter_app_name,
     )
     analysis_service = AnalysisService(news_service, market_service, ai_service)
 

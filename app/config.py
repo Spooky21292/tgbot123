@@ -25,6 +25,8 @@ class Settings:
     telegram_bot_token: str
     openrouter_api_key: str
     openrouter_model: str
+    openrouter_site_url: str
+    openrouter_app_name: str
     digest_hour_utc: int
     digest_minute_utc: int
     database_path: Path
@@ -52,6 +54,9 @@ def load_settings() -> Settings:
         raise ValueError("OPENROUTER_API_KEY is empty. Set it in system/Railway environment variables.")
 
     openrouter_model = _clean_secret(os.getenv("OPENROUTER_MODEL")) or "deepseek/deepseek-chat:free"
+    openrouter_site_url = _clean_secret(os.getenv("OPENROUTER_SITE_URL")) or "https://railway.app"
+    openrouter_app_name = _clean_secret(os.getenv("OPENROUTER_APP_NAME")) or "finance-digest-bot"
+
     digest_hour_utc = int(os.getenv("DIGEST_HOUR_UTC", "7"))
     digest_minute_utc = int(os.getenv("DIGEST_MINUTE_UTC", "0"))
     request_timeout_seconds = int(os.getenv("REQUEST_TIMEOUT_SECONDS", "30"))
@@ -69,6 +74,8 @@ def load_settings() -> Settings:
         telegram_bot_token=telegram_bot_token,
         openrouter_api_key=openrouter_api_key,
         openrouter_model=openrouter_model,
+        openrouter_site_url=openrouter_site_url,
+        openrouter_app_name=openrouter_app_name,
         digest_hour_utc=digest_hour_utc,
         digest_minute_utc=digest_minute_utc,
         database_path=database_path,
