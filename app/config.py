@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -15,6 +16,9 @@ ENV_PATH = BASE_DIR / ".env"
 # Railway/production can pass ENV directly.
 # Local development uses .env from project root.
 load_dotenv(ENV_PATH)
+
+
+TELEGRAM_TOKEN_RE = re.compile(r"^\d{6,}:[A-Za-z0-9_-]{20,}$")
 
 
 def _clean_secret(value: str | None) -> str:
@@ -49,6 +53,11 @@ def load_settings() -> Settings:
     if not telegram_bot_token:
         raise ValueError(
             "TELEGRAM_BOT_TOKEN is empty. Check .env path, Railway Variables, and token formatting."
+        )
+    if not TELEGRAM_TOKEN_RE.match(telegram_bot_token):
+        raise ValueError(
+            "TELEGRAM_BOT_TOKEN has invalid format. Expected <digits>:<secret>. "
+            "Remove quotes/spaces and regenerate token via @BotFather if needed."
         )
     if not openrouter_api_key:
         raise ValueError(

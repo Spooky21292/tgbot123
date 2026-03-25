@@ -21,11 +21,30 @@ logger = logging.getLogger(__name__)
 
 def test_telegram_token(token: str, timeout_seconds: int) -> None:
     url = f"https://api.telegram.org/bot{token}/getMe"
-    response = requests.get(url, timeout=timeout_seconds)
-    response.raise_for_status()
+    try:
+        response = requests.get(url, timeout=timeout_seconds)
+    except requests.RequestException as exc:
+        raise RuntimeError(
+            "Telegram API is unreachable. Check internet/proxy/firewall and retry."
+        ) from exc
+
+    if response.status_code == 401:
+        raise ValueError(
+            "Telegram returned 401 Unauthorized for getMe. "
+            "Your TELEGRAM_BOT_TOKEN is invalid/revoked. "
+            "Generate a fresh token in @BotFather and update .env / Railway Variables."
+        )
+
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as exc:
+        raise RuntimeError(
+            f"Telegram getMe failed with status {response.status_code}: {response.text[:300]}"
+        ) from exc
+
     body = response.json()
     if not body.get("ok"):
-        raise ValueError(f"Telegram getMe failed: {body}")
+        raise RuntimeError(f"Telegram getMe failed: {body}")
     username = body.get("result", {}).get("username", "unknown")
     logger.info("Telegram API check passed. Bot username: @%s", username)
 
