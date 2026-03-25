@@ -110,3 +110,14 @@ npm run start
 - `deploy/systemd/finskills-pro.service`
 - `deploy/scripts/deploy.sh`
 - `.env.production.example`
+
+## FKWALLET integration prerequisites
+
+Для безопасной production-интеграции FKWALLET в этом проекте используйте только официальную документацию провайдера и реальные тестовые ключи. Перед реализацией проверьте:
+
+- точный endpoint создания платежа и обязательные поля запроса;
+- формат webhook (включая `form-data`, если это указано в официальной документации);
+- алгоритм валидации подписи (порядок полей, кодировка, hash/hmac);
+- ожидаемый HTTP-ответ успешной обработки webhook для избежания повторных доставок.
+
+Переменные окружения для интеграции уже добавлены в `.env.example` и `.env.production.example`.

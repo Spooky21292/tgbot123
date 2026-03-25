@@ -81,6 +81,7 @@ nano /var/www/finskills-pro/shared/.env
 - `NEXTAUTH_URL=https://YOUR_DOMAIN`
 - `NEXTAUTH_SECRET` (длинная случайная строка)
 - `DATABASE_URL=file:/var/www/finskills-pro/shared/dev.db`
+- `FKWALLET_*` переменные заполнены только по официальной документации FKWALLET (endpoint/create webhook/signature).
 
 ---
 
