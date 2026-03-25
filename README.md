@@ -99,3 +99,14 @@ npm run start
 3. Откройте `/trade` и посмотрите стартовый виртуальный счёт.
 4. Выберите актив, откройте `/trade/[symbol]` и выполните демо-покупку или продажу.
 5. Вернитесь на `/trade`, чтобы посмотреть позиции, PnL и историю сделок.
+
+
+## Деплой на VDS
+
+Подробная пошаговая инструкция для Ubuntu + домен + SSL находится в `DEPLOY_VDS.md`.
+
+Готовые файлы деплоя:
+- `deploy/nginx/finskills-pro.conf`
+- `deploy/systemd/finskills-pro.service`
+- `deploy/scripts/deploy.sh`
+- `.env.production.example`
