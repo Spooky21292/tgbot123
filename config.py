@@ -28,6 +28,14 @@ class Settings:
         return time(hour=self.digest_hour, minute=self.digest_minute)
 
 
+
+
+def _normalize_token(raw: str) -> str:
+    token = raw.strip().strip('"').strip("'")
+    if token.startswith("bot") and ":" in token:
+        token = token[3:]
+    return token
+
 DEFAULT_RSS_FEEDS = [
     "https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best",
     "https://feeds.bloomberg.com/markets/news.rss",
@@ -47,7 +55,7 @@ def _int_env(name: str, default: int) -> int:
 
 
 def load_settings() -> Settings:
-    token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    token = _normalize_token(os.getenv("TELEGRAM_BOT_TOKEN", ""))
     if not token:
         raise RuntimeError("TELEGRAM_BOT_TOKEN is required")
 

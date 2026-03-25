@@ -19,6 +19,8 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 logger = logging.getLogger(__name__)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("telegram").setLevel(logging.INFO)
 
 
 def build_application() -> tuple[Application, DigestScheduler, StorageService]:
@@ -105,8 +107,9 @@ def _validate_token(token: str) -> bool:
         return True
     except InvalidToken:
         logger.error(
-            "TELEGRAM_BOT_TOKEN отклонен Telegram API (401 Unauthorized). "
-            "Проверьте токен в .env или перевыпустите его через BotFather."
+            "Telegram API вернул 401 Unauthorized для TELEGRAM_BOT_TOKEN. "
+            "Даже визуально корректный токен может быть отозван/устаревшим. "
+            "Проверьте .env, затем при необходимости перевыпустите токен через BotFather (/revoke)."
         )
         return False
     except TelegramError:
