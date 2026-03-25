@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 export function ActivatePlanForm({ planId }: { planId: string }) {
-  const [promoCode, setPromoCode] = useState('');
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -15,7 +13,7 @@ export function ActivatePlanForm({ planId }: { planId: string }) {
     const response = await fetch('/api/pricing/activate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ planId, promoCode })
+      body: JSON.stringify({ planId })
     });
     const data = await response.json().catch(() => null);
     if (!response.ok) return toast.error(data?.error || 'Не удалось активировать тариф');
@@ -25,8 +23,7 @@ export function ActivatePlanForm({ planId }: { planId: string }) {
   });
 
   return (
-    <div className="mt-4 space-y-3">
-      <Input value={promoCode} onChange={(event) => setPromoCode(event.target.value)} placeholder="Промокод" />
+    <div className="mt-4">
       <Button className="w-full rounded-full" disabled={pending} onClick={activate}>
         {pending ? 'Активация...' : 'Перейти к оплате'}
       </Button>
