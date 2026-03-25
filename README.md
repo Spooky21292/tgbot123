@@ -38,6 +38,8 @@ pip install -r requirements.txt
 python -m app.main
 ```
 
+> Можно запускать и так: `python app/bot.py` — файл автоматически прокинет запуск в `app.main`.
+
 При старте бот:
 - выводит путь к `.env`,
 - показывает факт загрузки токенов (без вывода самих токенов),
@@ -80,6 +82,8 @@ python -m app.main
 ```bash
 python -m app.main
 ```
+
+Если запускали `python app/bot.py`, теперь это тоже поддерживается (внутри будет вызван `app.main`).
 
 ## Команды
 - `/start`

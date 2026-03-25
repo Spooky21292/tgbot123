@@ -88,3 +88,17 @@ class FinanceDigestBot:
         self.application.add_handler(CommandHandler("stop", self.cmd_stop))
         self.application.add_handler(CommandHandler("digest", self.cmd_digest))
         self.application.add_handler(CommandHandler("status", self.cmd_status))
+
+
+if __name__ == "__main__":
+    import asyncio
+    import sys
+    from pathlib import Path
+
+    project_root = Path(__file__).resolve().parent.parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+
+    from app.main import run
+
+    asyncio.run(run())
