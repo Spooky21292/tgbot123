@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 
-from telegram import Update
+from telegram import Bot, Update
+from telegram.error import InvalidToken, TelegramError
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 from config import load_settings
@@ -96,11 +97,37 @@ def build_application() -> tuple[Application, DigestScheduler, StorageService]:
     return app, digest_scheduler, storage
 
 
+def _validate_token(token: str) -> bool:
+    try:
+        import asyncio
+
+        asyncio.run(Bot(token).get_me())
+        return True
+    except InvalidToken:
+        logger.error(
+            "TELEGRAM_BOT_TOKEN отклонен Telegram API (401 Unauthorized). "
+            "Проверьте токен в .env или перевыпустите его через BotFather."
+        )
+        return False
+    except TelegramError:
+        logger.exception("Не удалось проверить TELEGRAM_BOT_TOKEN из-за сетевой ошибки Telegram API")
+        return False
+
+
 def main() -> None:
     application, digest_scheduler, _ = build_application()
+    if not _validate_token(application.bot.token):
+        return
+
     digest_scheduler.start()
     logger.info("Bot is starting polling...")
-    application.run_polling(close_loop=False)
+    try:
+        application.run_polling(close_loop=False)
+    except InvalidToken:
+        logger.error(
+            "Остановка: TELEGRAM_BOT_TOKEN невалиден. "
+            "Укажите корректный токен из BotFather и перезапустите приложение."
+        )
 
 
 if __name__ == "__main__":
