@@ -10,11 +10,11 @@ import { ThemeToggle } from './theme-toggle';
 export function Navbar() {
   const { data: session } = useSession();
   const links = [
-    ['Курсы', '/courses'],
+    ['Курсы', session?.user ? '/courses' : '/auth/register'],
     ['Демо-трейд', session?.user ? '/trade' : '/auth/register'],
-    ['Блог', '/blog'],
-    ['Вебинары', '/webinars'],
-    ['Telegram Бот', '/bot']
+    ['Блог', session?.user ? '/blog' : '/auth/register'],
+    ['Вебинары', session?.user ? '/webinars' : '/auth/register'],
+    ['Telegram Бот', session?.user ? '/bot' : '/auth/register']
   ] as const;
 
   return (

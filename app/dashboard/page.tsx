@@ -14,8 +14,8 @@ import { LeaveFamilyButton } from '@/components/dashboard/leave-family-button';
 import { getViewerAccess, isFamilyPlan } from '@/lib/access';
 
 const tariffPlans = [
-  { id: 'learning', name: 'Learning', price: '499 ₽ / мес', text: 'Полный доступ ко всем курсам, вебинарам и записям.' },
-  { id: 'family', name: 'Family', price: '999 ₽ / мес', text: 'Общий доступ для семьи с единым архивом материалов.' }
+  { id: 'learning', name: 'Learning', price: '1000 ₽ / мес', text: 'Полный доступ ко всем курсам, вебинарам и записям.' },
+  { id: 'family', name: 'Family', price: '2000 ₽ / мес', text: 'Общий доступ для семьи с единым архивом материалов.' }
 ];
 
 export default async function DashboardPage() {

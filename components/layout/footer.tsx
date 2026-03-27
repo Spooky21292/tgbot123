@@ -4,8 +4,7 @@ import { Container } from './container';
 const contacts = [
   { label: '@Spooky9999', href: 'https://t.me/Spooky9999' },
   { label: '@Lisa200708', href: 'https://t.me/Lisa200708' },
-  { label: '@LLirik_if', href: 'https://t.me/LLirik_if' },
-  { label: '@semen27778', href: 'https://t.me/semen27778' }
+  { label: '@LLirik_if', href: 'https://t.me/LLirik_if' }
 ];
 
 export function Footer() {

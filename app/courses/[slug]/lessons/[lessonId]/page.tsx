@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Clock3, PlayCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Clock3 } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import { redirect, notFound } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
@@ -56,8 +56,8 @@ export default async function LessonPage({ params }: { params: { slug: string; l
           <div className="rounded-2xl border border-border/80 bg-card p-6 sm:p-8">
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5">
-                <PlayCircle className="h-4 w-4" />
-                Видео + конспект
+                <BookOpen className="h-4 w-4" />
+                Подробный конспект
               </span>
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5">
                 <Clock3 className="h-4 w-4" />
@@ -69,9 +69,6 @@ export default async function LessonPage({ params }: { params: { slug: string; l
               {lesson.title}
             </h1>
             <p className="mt-4 max-w-3xl text-base leading-7 text-muted-foreground">{lesson.description}</p>
-            <div className="mt-8 overflow-hidden rounded-2xl border border-border/80 bg-slate-950">
-              <iframe title={lesson.title} src={lesson.videoUrl} className="aspect-video w-full" allowFullScreen />
-            </div>
           </div>
 
           <article className="rounded-2xl border border-border/80 bg-card px-6 py-8 sm:px-10 sm:py-10">
@@ -99,7 +96,7 @@ export default async function LessonPage({ params }: { params: { slug: string; l
               <CardTitle>Как пройти урок с пользой</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm leading-7 text-muted-foreground">
-              <p>Сначала посмотрите видео, затем прочитайте конспект в спокойном темпе.</p>
+              <p>Начните с конспекта и пройдите материал по шагам: определения, примеры и практика.</p>
               <p>Отмечайте один практический вывод, который можно применить сегодня.</p>
               <p>В конце пройдите мини-тест, чтобы закрепить ключевые идеи.</p>
             </CardContent>

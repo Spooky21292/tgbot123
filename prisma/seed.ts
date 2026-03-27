@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { RUSSIAN_ASSETS } from '../lib/russian-assets';
 
 const prisma = new PrismaClient();
-const lessonVideo = 'https://www.youtube.com/embed/1e8xgF0JtVg';
+const lessonVideo = '';
 
 type LessonSeed = { title: string; description: string; videoUrl: string; content: string };
 type CourseSeed = { title: string; slug: string; description: string; age: string; level: string; cover: string; isPremium: boolean; lessons: LessonSeed[] };
@@ -20,10 +20,26 @@ const coverPool = [
   'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?auto=format&fit=crop&w=1200&q=80'
 ];
 
-function makeLesson(title: string, description: string, focus: string, audience: string, practical: string, step: string): LessonSeed {
+function makeLesson(
+  title: string,
+  description: string,
+  focus: string,
+  audience: string,
+  practical: string,
+  step: string,
+  moduleTitle: string,
+  moduleSummary: string
+): LessonSeed {
   const content = `# ${title}
 
 ${audience} сталкивается с темой «${focus}» не в вакууме, а в повседневных решениях: покупки, обязательства, разговоры с семьёй, планы на обучение, подработка, рост дохода, тревога из-за ошибок и желание чувствовать больше контроля. Этот урок устроен как подробный конспект, который помогает не просто «узнать термин», а увидеть, как тема работает в реальной жизни.
+
+## Где этот урок находится в курсе
+
+- Модуль: ${moduleTitle}
+- Фокус урока: ${moduleSummary}
+- Рекомендуемая длительность: 12–20 минут
+- Формат: теория + бытовые примеры + практический шаг
 
 ## Что важно понять в самом начале
 
@@ -44,6 +60,21 @@ ${audience} сталкивается с темой «${focus}» не в ваку
 ## Пример из жизни
 
 Представьте ситуацию: человек хочет действовать правильно, но у него нет чёткой логики. Он ориентируется на остаток на карте, откладывает важные разговоры, не фиксирует цели и надеется, что «в следующий раз всё будет лучше». Обычно это приводит к повторяющемуся циклу: напряжение → импульсивное решение → краткое облегчение → новая тревога. Как только появляется система вокруг темы «${focus}», напряжение снижается. Даже если доход не меняется мгновенно, меняется качество решений.
+
+## Разбор урока по шагам
+
+1. **Что происходит сейчас** — называем проблему простыми словами и фиксируем стартовую ситуацию без самообвинения.
+2. **Почему так происходит** — выделяем триггеры: спешка, усталость, давление окружения, отсутствие понятной структуры.
+3. **Как действовать спокойнее** — вводим 1–2 правила, которые реально соблюдать в обычном ритме жизни.
+4. **Как проверить результат** — в конце недели сверяем, стало ли меньше хаоса и легче ли принимать решения.
+
+## Мини-чеклист перед важным решением
+
+- Понимаю ли я цель этого шага?
+- Что будет через неделю, месяц и квартал, если я так сделаю?
+- Это решение помогает теме «${focus}» или ухудшает её?
+- Согласуется ли шаг с моими текущими приоритетами?
+- Готов ли я повторять это правило регулярно?
 
 💡 Совет: ${practical}. Сильные финансовые привычки выглядят не как подвиг, а как повторяемое спокойное действие.
 
@@ -181,32 +212,31 @@ ${tasks.map((task, index) => `${index + 1}. ${task}`).join('\n')}
 }
 
 function buildCourseLessons(blueprint: CourseBlueprint): LessonSeed[] {
-  const topics = [
-    ['Паспорт курса и подробный маршрут', 'Длинное методическое введение: проблема, навыки, модульная программа и практические задания курса.', 'Откройте конспект этого урока как карту курса и отметьте 2–3 раздела, с которых начнёте в первую очередь.'],
-    ['База и карта решений', `Как устроена тема «${blueprint.focus}» и почему без неё сложно принимать спокойные решения.`, 'Составьте короткую карту: что в этой теме у вас уже под контролем, а что пока требует внимания.'],
-    ['Повседневный ритм и ошибки', `Разобрать повседневные сценарии, где «${blueprint.focus}» сильнее всего влияет на деньги и поведение.`, 'В течение недели отмечайте минимум три ситуации, где тема урока повлияла на ваши решения.'],
-    ['Практика, правила и личные ориентиры', `Собрать рабочие правила, которые помогают держать тему «${blueprint.focus}» под контролем без перегруза.`, 'Запишите 3 собственных правила и проверьте их на практике в течение 7 дней.'],
-    ['Долгий горизонт и устойчивость', `Перевести тему «${blueprint.focus}» в систему, которая будет работать и через месяц, и через год.`, 'Сделайте мини-план на 30 дней: что вы будете пересматривать, отслеживать и улучшать.']
-  ];
-
-  return topics.map(([suffix, description, step], index) =>
-    index === 0
-      ? {
-        title: `Паспорт курса: ${blueprint.title}`,
-        description,
-        videoUrl: lessonVideo,
-        content: buildCourseOverviewContent(blueprint)
-      }
-      :
-    makeLesson(
-      `${blueprint.title}: ${suffix}`,
-      description,
-      blueprint.focus,
-      getAudienceProfile(blueprint.age),
-      blueprint.practical,
-      `${step} Дополнительно вернитесь к своему бюджету, привычкам и ближайшей цели, чтобы связать урок с реальной жизнью. Шаг ${index + 1} лучше делать письменно — так выводы становятся конкретнее.`
+  const modules = buildModulePlan(blueprint);
+  const detailedLessons = modules.flatMap((module) =>
+    module.lessons.map((lesson) =>
+      makeLesson(
+        `${blueprint.title}: ${lesson.title}`,
+        `${module.title} — ${lesson.summary}`,
+        blueprint.focus,
+        getAudienceProfile(blueprint.age),
+        blueprint.practical,
+        `Сделайте короткий практический шаг по теме урока: ${lesson.summary} После этого зафиксируйте 2 вывода и один следующий шаг на неделю.`,
+        module.title,
+        lesson.summary
+      )
     )
   );
+
+  return [
+    {
+      title: `Паспорт курса: ${blueprint.title}`,
+      description: 'Длинное методическое введение: проблема, навыки, модульная программа и практические задания курса.',
+      videoUrl: lessonVideo,
+      content: buildCourseOverviewContent(blueprint)
+    },
+    ...detailedLessons
+  ];
 }
 
 const courseBlueprints: CourseBlueprint[] = [
@@ -374,7 +404,7 @@ async function main() {
   for (const template of courseTemplates) {
     const course = await prisma.course.create({ data: { title: template.title, slug: template.slug, description: template.description, ageGroup: template.age, level: template.level, coverImage: template.cover, isPublished: true, isPremium: template.isPremium } });
     for (const [index, item] of template.lessons.entries()) {
-      const lesson = await prisma.lesson.create({ data: { courseId: course.id, title: item.title, description: item.description, videoUrl: item.videoUrl, content: item.content, order: index + 1, durationMinutes: 12 + index * 2 } });
+      const lesson = await prisma.lesson.create({ data: { courseId: course.id, title: item.title, description: item.description, videoUrl: item.videoUrl, content: item.content, order: index + 1, durationMinutes: 12 + (index % 5) * 2 } });
       const quiz = await prisma.quiz.create({ data: { lessonId: lesson.id, title: `Тест: ${item.title}` } });
       await prisma.quizQuestion.createMany({ data: getQuizQuestions(item.title).map((question) => ({ ...question, quizId: quiz.id })) });
     }
