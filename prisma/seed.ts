@@ -9,6 +9,7 @@ type LessonSeed = { title: string; description: string; videoUrl: string; conten
 type CourseSeed = { title: string; slug: string; description: string; age: string; level: string; cover: string; isPremium: boolean; lessons: LessonSeed[] };
 type CourseBlueprint = { title: string; slug: string; description: string; age: string; level: string; cover: string; isPremium: boolean; focus: string; practical: string };
 type ArticleBlueprint = { title: string; slug: string; category: string; excerpt: string; angle: string; audience: string };
+type ModuleTopic = { title: string; lessons: Array<{ title: string; summary: string }> };
 
 const coverPool = [
   'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80',
@@ -64,8 +65,124 @@ ${step}
   return { title, description, videoUrl: lessonVideo, content };
 }
 
+function getAudienceLabel(age: string) {
+  if (age === '14-17') return 'подростков';
+  if (age === '18-25') return 'молодых взрослых';
+  return 'взрослых и семей';
+}
+
+function getAudienceProfile(age: string) {
+  if (age === '14-17') return 'подросток и его семья';
+  if (age === '18-25') return 'студент, молодой специалист или фрилансер';
+  return 'взрослый человек, пара или семья';
+}
+
+function buildSkills(blueprint: CourseBlueprint) {
+  return [
+    `Сможете без стресса распределять деньги по приоритетам, когда тема «${blueprint.focus}» становится актуальной.`,
+    'Поймёте, как заранее видеть риски и принимать решения без импульсивных действий.',
+    'Научитесь переводить абстрактные цели в конкретные еженедельные шаги.',
+    'Сможете использовать простой чек-лист перед любым важным финансовым выбором.',
+    'Поймёте, как обсуждать деньги спокойно и без давления внутри семьи или с близкими.',
+    'Научитесь замечать повторяющиеся утечки бюджета и корректировать их мягко, без крайностей.',
+    'Сможете выстраивать финансовые привычки, которые реально поддерживать месяцами.',
+    'Поймёте, как проводить короткую ревизию плана и удерживать курс на длинной дистанции.'
+  ];
+}
+
+function buildModulePlan(blueprint: CourseBlueprint): ModuleTopic[] {
+  return [
+    {
+      title: 'Модуль 1: Спокойная база и личная точка старта',
+      lessons: [
+        { title: 'Урок 1.1: Где вы сейчас', summary: 'Определяем стартовую ситуацию, фиксируем ожидания и разбираем базовые термины, чтобы снизить тревогу уже в начале.' },
+        { title: 'Урок 1.2: Деньги без хаоса', summary: `Разбираем, как тема «${blueprint.focus}» проявляется в повседневности, и учимся замечать повторяющиеся финансовые сценарии.` },
+        { title: 'Урок 1.3: Ошибки, которые делают почти все', summary: 'Показываем типичные ловушки мышления и объясняем, как вовремя замечать импульсивные решения.' },
+        { title: 'Урок 1.4: Мини-план на неделю', summary: 'Собираем первый мягкий план действий и делаем его реалистичным по времени и нагрузке.' }
+      ]
+    },
+    {
+      title: 'Модуль 2: Навыки ежедневного управления',
+      lessons: [
+        { title: 'Урок 2.1: Приоритеты и границы', summary: 'Учимся отделять важное от срочного, чтобы деньги работали на цели, а не на эмоциональные реакции.' },
+        { title: 'Урок 2.2: Карта регулярных расходов', summary: 'Формируем прозрачную структуру обязательных и гибких трат без сложных таблиц и перегруза.' },
+        { title: 'Урок 2.3: Повторяемые правила', summary: 'Создаём 3–5 простых правил, которые помогают удерживать курс даже в загруженные периоды.' },
+        { title: 'Урок 2.4: Разбор реальных кейсов', summary: 'Разбираем практические ситуации и выбираем решения, которые подходят именно вашему ритму жизни.' }
+      ]
+    },
+    {
+      title: 'Модуль 3: Решения на средний и длинный срок',
+      lessons: [
+        { title: 'Урок 3.1: Цели и сроки', summary: 'Переводим желания в конкретные цели: сумма, срок, ежемесячный шаг и критерии прогресса.' },
+        { title: 'Урок 3.2: Риски и запас прочности', summary: 'Обсуждаем, как подготовиться к нестабильности и какие сценарии стоит продумать заранее.' },
+        { title: 'Урок 3.3: Как не срываться', summary: 'Изучаем мягкие способы поддерживать дисциплину без давления, чувства вины и резких ограничений.' },
+        { title: 'Урок 3.4: Контроль без выгорания', summary: 'Настраиваем короткие регулярные проверки, чтобы видеть прогресс и корректировать план вовремя.' }
+      ]
+    },
+    {
+      title: 'Модуль 4: Интеграция в реальную жизнь',
+      lessons: [
+        { title: 'Урок 4.1: Разговоры о деньгах', summary: 'Учимся спокойно обсуждать финансовые вопросы с близкими и договариваться о правилах без конфликтов.' },
+        { title: 'Урок 4.2: Личная система на 90 дней', summary: 'Собираем рабочую структуру из целей, привычек и точек контроля на ближайшие три месяца.' },
+        { title: 'Урок 4.3: Антикризисный сценарий', summary: 'Составляем простой план на случай просадки дохода или непредвиденных расходов.' },
+        { title: 'Урок 4.4: Итог и следующий шаг', summary: 'Фиксируем результаты курса, выбираем приоритеты и определяем дальнейший маршрут развития.' }
+      ]
+    }
+  ];
+}
+
+function buildPracticeTasks(blueprint: CourseBlueprint) {
+  return [
+    `Соберите простую таблицу (Google Sheets/Excel) с тремя колонками: «обязательные траты», «гибкие траты», «цели/резерв», и ведите её 14 дней в спокойном ритме.`,
+    'Проведите мини-аудит банковского приложения: проверьте автосписания, подписки, частые переводы и зафиксируйте 2–3 пункта, которые можно оптимизировать без стресса.',
+    `Подготовьте личный чек-лист из 5 вопросов перед любым важным финансовым решением по теме «${blueprint.focus}» и протестируйте его минимум в двух реальных ситуациях.`
+  ];
+}
+
+function buildCourseOverviewContent(blueprint: CourseBlueprint) {
+  const audience = getAudienceLabel(blueprint.age);
+  const skills = buildSkills(blueprint);
+  const modules = buildModulePlan(blueprint);
+  const tasks = buildPracticeTasks(blueprint);
+
+  const moduleText = modules.map((module) => {
+    const lessonRows = module.lessons
+      .map((lesson) => `- ${lesson.title} — ${lesson.summary} Каждый урок рассчитан на 12–20 минут изучения.`)
+      .join('\n');
+    return `- ${module.title}\n${lessonRows}`;
+  }).join('\n\n');
+
+  const introParagraphs = [
+    `Курс «${blueprint.title}» решает практическую задачу: помогает превратить тему «${blueprint.focus}» из тревожной и размытой в понятную систему ежедневных действий. Большинство ошибок в деньгах происходит не из-за «недостатка силы воли», а потому что человеку не хватает структуры: что делать сначала, как проверять решения и как не срываться через неделю. Мы строим обучение так, чтобы после каждого короткого занятия у вас оставался один конкретный шаг, который можно выполнить в реальной жизни.`,
+    `Для ${audience} особенно важно изучать эту тему в спокойном ритме: без давления, без морализаторства и без обещаний «быстрых результатов». На этом этапе жизни часто меняются роли, ответственность и финансовая нагрузка, поэтому решения легко принимать на эмоциях. Курс снижает этот шум: даёт ясные ориентиры, минимальный набор рабочих правил и практику, которую можно встроить даже в плотный график.`,
+    `Отдельный акцент мы делаем на устойчивости: не на «идеальном месяце», а на системе, которую реально поддерживать долго. Вы разберёте, как заранее видеть риски, отделять цели от импульсов и принимать решения так, чтобы они поддерживали качество жизни, отношения с близкими и долгосрочные планы. Это не про жёсткую экономию, а про контроль, который добавляет спокойствие.`,
+    `В результате вы получите не только знания, но и готовый маршрут действий на ближайшие недели и месяцы: что отслеживать, как проверять прогресс и как корректировать план без ощущения, что «всё снова сломалось». Такой подход помогает сохранить мотивацию и превращает финансовую грамотность в навык, который работает в обычной жизни, а не только на бумаге.`
+  ];
+
+  return `# ${blueprint.title}: подробный курс-навигатор
+
+## 1. Глубокое описание (Введение)
+
+${introParagraphs.join('\n\n')}
+
+## 2. Чему вы научитесь (Детализация)
+
+${skills.map((skill) => `- ${skill}`).join('\n')}
+
+## 3. Подробная программа курса (Развернутая структура)
+
+${moduleText}
+
+## 4. Практическая часть (Закрепление)
+
+${tasks.map((task, index) => `${index + 1}. ${task}`).join('\n')}
+
+💡 Методика FinSkills Pro: короткие уроки по 12–20 минут, спокойная подача, практические шаги без агрессивных обещаний и давления.`;
+}
+
 function buildCourseLessons(blueprint: CourseBlueprint): LessonSeed[] {
   const topics = [
+    ['Паспорт курса и подробный маршрут', 'Длинное методическое введение: проблема, навыки, модульная программа и практические задания курса.', 'Откройте конспект этого урока как карту курса и отметьте 2–3 раздела, с которых начнёте в первую очередь.'],
     ['База и карта решений', `Как устроена тема «${blueprint.focus}» и почему без неё сложно принимать спокойные решения.`, 'Составьте короткую карту: что в этой теме у вас уже под контролем, а что пока требует внимания.'],
     ['Повседневный ритм и ошибки', `Разобрать повседневные сценарии, где «${blueprint.focus}» сильнее всего влияет на деньги и поведение.`, 'В течение недели отмечайте минимум три ситуации, где тема урока повлияла на ваши решения.'],
     ['Практика, правила и личные ориентиры', `Собрать рабочие правила, которые помогают держать тему «${blueprint.focus}» под контролем без перегруза.`, 'Запишите 3 собственных правила и проверьте их на практике в течение 7 дней.'],
@@ -73,11 +190,19 @@ function buildCourseLessons(blueprint: CourseBlueprint): LessonSeed[] {
   ];
 
   return topics.map(([suffix, description, step], index) =>
+    index === 0
+      ? {
+        title: `${blueprint.title}: ${suffix}`,
+        description,
+        videoUrl: lessonVideo,
+        content: buildCourseOverviewContent(blueprint)
+      }
+      :
     makeLesson(
       `${blueprint.title}: ${suffix}`,
       description,
       blueprint.focus,
-      blueprint.age === '14-17' ? 'Подросток и его семья' : blueprint.age === '18-25' ? 'Студент, молодой специалист или фрилансер' : 'Взрослый человек или семья',
+      getAudienceProfile(blueprint.age),
       blueprint.practical,
       `${step} Дополнительно вернитесь к своему бюджету, привычкам и ближайшей цели, чтобы связать урок с реальной жизнью. Шаг ${index + 1} лучше делать письменно — так выводы становятся конкретнее.`
     )
@@ -249,7 +374,7 @@ async function main() {
   for (const template of courseTemplates) {
     const course = await prisma.course.create({ data: { title: template.title, slug: template.slug, description: template.description, ageGroup: template.age, level: template.level, coverImage: template.cover, isPublished: true, isPremium: template.isPremium } });
     for (const [index, item] of template.lessons.entries()) {
-      const lesson = await prisma.lesson.create({ data: { courseId: course.id, title: item.title, description: item.description, videoUrl: item.videoUrl, content: item.content, order: index + 1, durationMinutes: 22 + index * 3 } });
+      const lesson = await prisma.lesson.create({ data: { courseId: course.id, title: item.title, description: item.description, videoUrl: item.videoUrl, content: item.content, order: index + 1, durationMinutes: 12 + index * 2 } });
       const quiz = await prisma.quiz.create({ data: { lessonId: lesson.id, title: `Тест: ${item.title}` } });
       await prisma.quizQuestion.createMany({ data: getQuizQuestions(item.title).map((question) => ({ ...question, quizId: quiz.id })) });
     }
