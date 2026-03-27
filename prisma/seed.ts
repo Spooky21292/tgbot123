@@ -192,7 +192,7 @@ function buildCourseLessons(blueprint: CourseBlueprint): LessonSeed[] {
   return topics.map(([suffix, description, step], index) =>
     index === 0
       ? {
-        title: `${blueprint.title}: ${suffix}`,
+        title: `Паспорт курса: ${blueprint.title}`,
         description,
         videoUrl: lessonVideo,
         content: buildCourseOverviewContent(blueprint)
