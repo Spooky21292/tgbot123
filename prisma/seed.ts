@@ -204,7 +204,7 @@ function buildCourseOverviewContent(blueprint: CourseBlueprint) {
     `В результате вы получите не только знания, но и готовый маршрут действий на ближайшие недели и месяцы: что отслеживать, как проверять прогресс и как корректировать план без ощущения, что «всё снова сломалось». Такой подход помогает сохранить мотивацию и превращает финансовую грамотность в навык, который работает в обычной жизни, а не только на бумаге.`
   ];
 
-  return `# ${blueprint.title}: подробный курс-навигатор
+  const overviewContent = `# ${blueprint.title}: подробный курс-навигатор
 
 ## 1. Глубокое описание (Введение)
 
@@ -223,6 +223,8 @@ ${moduleText}
 ${tasks.map((task, index) => `${index + 1}. ${task}`).join('\n')}
 
 💡 Методика FinSkills Pro: короткие уроки по 12–20 минут, спокойная подача, практические шаги без агрессивных обещаний и давления.`;
+
+  return overviewContent;
 }
 
 function buildCourseLessons(blueprint: CourseBlueprint): LessonSeed[] {
@@ -320,7 +322,7 @@ const articleBlueprints: ArticleBlueprint[] = [
 ];
 
 function buildArticleContent(article: ArticleBlueprint) {
-  return `# ${article.title}
+  const articleContent = `# ${article.title}
 
 ## Почему эта тема важна
 
@@ -354,6 +356,8 @@ ${article.audience} регулярно сталкивается с темой «
 ## Итог
 
 Статья про «${article.angle}» полезна ровно настолько, насколько она помогает принять одно более зрелое решение в реальной жизни. Если после чтения вы лучше понимаете, на что влияют ваши деньги, как устроены привычки и где начинается контроль — значит материал уже работает.`;
+
+  return articleContent;
 }
 
 const courseTemplates: CourseSeed[] = courseBlueprints.map((blueprint) => ({ ...blueprint, lessons: buildCourseLessons(blueprint) }));
