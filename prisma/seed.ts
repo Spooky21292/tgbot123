@@ -430,7 +430,21 @@ const courseTemplates: CourseSeed[] = courseCatalog.map((course) => ({
     title: lesson.title,
     description: lesson.description,
     videoUrl: lessonVideo,
-    content: lesson.content
+    content: `${lesson.content}
+
+## Что вы заберёте после урока
+- Чёткое понимание темы: ${lesson.title.toLowerCase()}.
+- Практический ориентир курса: ${course.focus}.
+- Один конкретный следующий шаг на 24 часа.
+
+## Мини-задание FinSkills Pro
+1. Выполните действие по теме урока и зафиксируйте результат в заметках.
+2. Ответьте себе: «Что в этом уроке снизило хаос в деньгах именно у меня?»
+3. Запланируйте следующую проверку через 7 дней.
+
+---
+Курс: **${course.title}**  
+Практический вектор: **${course.practical}**`
   }))
 }));
 
