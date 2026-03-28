@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+# Keep common binary formats out of text diffs/patch workflows
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.mp4 binary
+*.mov binary
